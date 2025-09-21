@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tinder Clone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" id="homeBtn">
+                <i class="fas fa-fire text-danger"></i>
+                <span class="brand-text">Petmatch</span>
+            </a>
+            <div class="navbar-nav ms-auto d-flex flex-row">
+                <a class="nav-link me-3" href="#" id="likesBtn" title="Mis Likes">
+                    <i class="fas fa-heart"></i>
+                    <span class="badge bg-danger" id="likesCount">0</span>
+                </a>
+                <a class="nav-link me-3" href="#" id="matchesBtn" title="Matches">
+                    <i class="fas fa-comments"></i>
+                    <span class="badge bg-primary" id="matchesCount">0</span>
+                </a>
+                <a class="nav-link" href="#" id="profileBtn" title="Mi Perfil">
+                    <i class="fas fa-user-circle"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-content">
+                <div class="welcome-logo">
+                    <i class="fas fa-paw"></i>
+                    <h1>PetMatch</h1>
+                    <p class="welcome-subtitle">Conecta con mascotas y sus dueños</p>
+                </div>
+                
+                <div class="welcome-options">
+                    <div class="welcome-card" onclick="showSwipeSection()">
+                        <div class="welcome-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Dar Likes</h3>
+                        <p>Encuentra mascotas adorables y conecta con sus dueños</p>
+                        <button class="btn btn-primary welcome-btn">
+                            <i class="fas fa-fire"></i> Empezar a Swipear
+                        </button>
+                    </div>
+                    
+                    <div class="welcome-card" onclick="showPetCareSection()">
+                        <div class="welcome-icon">
+                            <i class="fas fa-paw"></i>
+                        </div>
+                        <h3>Cuidado de Mascotas</h3>
+                        <p>Servicios, tiendas y tips para el cuidado de tu mascota</p>
+                        <button class="btn btn-outline-primary welcome-btn">
+                            <i class="fas fa-shield-alt"></i> Explorar Servicios
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="donation-section">
+                    <div class="donation-card" onclick="showDonationSection()">
+                        <div class="donation-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Donar a Refugios</h3>
+                        <p>Ayuda a los refugios asociados a continuar salvando vidas</p>
+                        <button class="btn btn-success welcome-btn">
+                            <i class="fas fa-donate"></i> Hacer Donación
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Swipe Cards Section -->
+        <div class="swipe-container d-none" id="swipeContainer">
+            <div class="card-stack" id="cardStack">
+                <!-- Cards will be dynamically generated here -->
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-action btn-pass" id="passBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="btn-action btn-like" id="likeBtn">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Likes Section -->
+        <div class="likes-section d-none" id="likesSection">
+            <div class="likes-header">
+                <h2><i class="fas fa-heart text-danger"></i> Mis Likes</h2>
+                <div class="likes-actions">
+                    <button class="btn btn-outline-danger" id="clearLikesBtn">
+                        <i class="fas fa-trash"></i> Eliminar Todos
+                    </button>
+                    <button class="btn btn-outline-primary" id="backToSwipeFromLikesBtn">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                </div>
+            </div>
+            <div class="likes-grid" id="likesGrid">
+                <!-- Likes will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Matches Section -->
+        <div class="matches-section d-none" id="matchesSection">
+            <div class="matches-header">
+                <h2><i class="fas fa-comments text-primary"></i> Nuevos Matches</h2>
+                <button class="btn btn-outline-primary" id="backToSwipeBtn">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+            <div class="matches-grid" id="matchesGrid">
+                <!-- Matches will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Messages Section -->
+        <div class="messages-section d-none" id="messagesSection">
+            <div class="messages-header">
+                <button class="btn btn-outline-primary" id="backToMatchesBtn">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <div class="chat-user-info">
+                    <div class="chat-profile-image" id="chatProfileImage"></div>
+                    <h3 id="chatUserName">Chat</h3>
+                </div>
+                <button class="btn btn-success" id="adoptFromChatBtn">
+                    <i class="fas fa-heart"></i> Adoptar
+                </button>
+            </div>
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages will be displayed here -->
+            </div>
+            <div class="message-input-container">
+                <input type="text" class="form-control" id="messageInput" placeholder="Escribe un mensaje...">
+                <button class="btn btn-primary" id="sendMessageBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Pet Care Section -->
+        <div class="pet-care-section d-none" id="petCareSection">
+            <div class="pet-care-header">
+                <h2><i class="fas fa-paw text-primary"></i> Cuidado de Mascotas</h2>
+                <button class="btn btn-outline-primary" id="backToWelcomeBtn">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+            
+            <div class="pet-care-content">
+                <!-- Services Section -->
+                <div class="care-section">
+                    <h3><i class="fas fa-stethoscope"></i> Servicios para Mascotas</h3>
+                    <div class="services-grid">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <h4>Veterinarios</h4>
+                            <p>Encuentra veterinarios cerca de ti para el cuidado de tu mascota</p>
+                            <button class="btn btn-outline-primary btn-sm">Buscar</button>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                            <h4>Peluquería</h4>
+                            <p>Servicios de grooming y cuidado estético para tu mascota</p>
+                            <button class="btn btn-outline-primary btn-sm">Buscar</button>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <h4>Guardería</h4>
+                            <p>Centros de cuidado diurno para cuando no puedas estar con tu mascota</p>
+                            <button class="btn btn-outline-primary btn-sm">Buscar</button>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-walking"></i>
+                            </div>
+                            <h4>Paseadores</h4>
+                            <p>Servicios de paseo y ejercicio para mantener a tu mascota activa</p>
+                            <button class="btn btn-outline-primary btn-sm">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Store Catalog Section -->
+                <div class="care-section">
+                    <h3><i class="fas fa-store"></i> Catálogo de Tiendas</h3>
+                    <div class="stores-grid">
+                        <div class="store-card">
+                            <div class="store-image" style="background-image: url('https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=200&fit=crop')"></div>
+                            <div class="store-info">
+                                <h4>PetShop Central</h4>
+                                <p>Alimentos, juguetes y accesorios para mascotas</p>
+                                <div class="store-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <span>4.8</span>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Ver Tienda</button>
+                            </div>
+                        </div>
+                        <div class="store-card">
+                            <div class="store-image" style="background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=300&h=200&fit=crop')"></div>
+                            <div class="store-info">
+                                <h4>Vet Supplies Pro</h4>
+                                <p>Equipos médicos y suministros veterinarios</p>
+                                <div class="store-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <span>4.2</span>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Ver Tienda</button>
+                            </div>
+                        </div>
+                        <div class="store-card">
+                            <div class="store-image" style="background-image: url('https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=200&fit=crop')"></div>
+                            <div class="store-info">
+                                <h4>Pet Fashion</h4>
+                                <p>Ropa y accesorios de moda para mascotas</p>
+                                <div class="store-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <span>4.9</span>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Ver Tienda</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="care-section">
+                    <h3><i class="fas fa-lightbulb"></i> Tips de Cuidado</h3>
+                    <div class="tips-container">
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="tip-content">
+                                <h4>Alimentación Saludable</h4>
+                                <p>Proporciona una dieta balanceada con alimentos de calidad. Evita dar comida humana que pueda ser tóxica para tu mascota.</p>
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                            <div class="tip-content">
+                                <h4>Ejercicio Regular</h4>
+                                <p>Mantén a tu mascota activa con paseos diarios y juegos. El ejercicio es esencial para su salud física y mental.</p>
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="tip-content">
+                                <h4>Vacunación</h4>
+                                <p>Mantén al día las vacunas de tu mascota. Consulta con tu veterinario sobre el calendario de vacunación.</p>
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="tip-content">
+                                <h4>Amor y Atención</h4>
+                                <p>Dedica tiempo de calidad con tu mascota. El amor y la atención son fundamentales para su bienestar emocional.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donation Section -->
+        <div class="donation-main-section d-none" id="donationSection">
+            <div class="donation-header">
+                <h2><i class="fas fa-heart text-danger"></i> Donar a Refugios</h2>
+                <button class="btn btn-outline-primary" id="backToWelcomeFromDonationBtn">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+            
+            <div class="donation-content">
+                <div class="donation-intro">
+                    <h3>Refugios Asociados</h3>
+                    <p>Estos refugios trabajan incansablemente para salvar y cuidar animales. Tu donación les ayuda a continuar su labor.</p>
+                </div>
+                
+                <div class="shelters-grid">
+                    <div class="shelter-card">
+                        <div class="shelter-image" style="background-image: url('https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=250&fit=crop')"></div>
+                        <div class="shelter-info">
+                            <h4>Refugio Esperanza Animal</h4>
+                            <p>Dedicado al rescate y cuidado de animales abandonados desde 2015.</p>
+                            <div class="shelter-stats">
+                                <span><i class="fas fa-paw"></i> 150+ animales rescatados</span>
+                                <span><i class="fas fa-home"></i> Lima, Perú</span>
+                            </div>
+                            <div class="donation-amounts">
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(1, 25)">$25</button>
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(1, 50)">$50</button>
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(1, 100)">$100</button>
+                            </div>
+                            <button class="btn btn-success" onclick="donateToShelter(1, 0)">
+                                <i class="fas fa-donate"></i> Donar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="shelter-card">
+                        <div class="shelter-image" style="background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=250&fit=crop')"></div>
+                        <div class="shelter-info">
+                            <h4>Casa de Mascotas Felices</h4>
+                            <p>Organización sin fines de lucro que rescata y rehabilita animales en situación de abandono.</p>
+                            <div class="shelter-stats">
+                                <span><i class="fas fa-paw"></i> 200+ animales rescatados</span>
+                                <span><i class="fas fa-home"></i> Arequipa, Perú</span>
+                            </div>
+                            <div class="donation-amounts">
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(2, 25)">$25</button>
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(2, 50)">$50</button>
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(2, 100)">$100</button>
+                            </div>
+                            <button class="btn btn-success" onclick="donateToShelter(2, 0)">
+                                <i class="fas fa-donate"></i> Donar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="shelter-card">
+                        <div class="shelter-image" style="background-image: url('https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=250&fit=crop')"></div>
+                        <div class="shelter-info">
+                            <h4>Refugio Gatos del Corazón</h4>
+                            <p>Especialistas en el rescate y cuidado de gatos, con más de 10 años de experiencia.</p>
+                            <div class="shelter-stats">
+                                <span><i class="fas fa-paw"></i> 300+ gatos rescatados</span>
+                                <span><i class="fas fa-home"></i> Cusco, Perú</span>
+                            </div>
+                            <div class="donation-amounts">
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(3, 25)">$25</button>
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(3, 50)">$50</button>
+                                <button class="btn btn-outline-success btn-sm" onclick="donateToShelter(3, 100)">$100</button>
+                            </div>
+                            <button class="btn btn-success" onclick="donateToShelter(3, 0)">
+                                <i class="fas fa-donate"></i> Donar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Modal -->
+    <div class="modal fade" id="matchModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content match-modal-content">
+                <div class="modal-body text-center">
+                    <div class="match-animation">
+                        <div class="match-hearts">
+                            <i class="fas fa-heart"></i>
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h2 class="match-title">¡Es un Match!</h2>
+                        <p class="match-subtitle">Tú y <span id="matchUserName"></span> se gustaron mutuamente</p>
+                        <div class="match-actions">
+                            <button class="btn btn-outline-light me-2" data-bs-dismiss="modal">Seguir Swipeando</button>
+                            <button class="btn btn-primary" id="sendMessageNowBtn">Enviar Mensaje</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Profile Modal -->
+    <div class="modal fade" id="detailedProfileModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Perfil Detallado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detailedProfileContent">
+                    <!-- Content will be dynamically generated -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="adoptFromProfileBtn">
+                        <i class="fas fa-heart"></i> Adoptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pet Info Modal -->
+    <div class="modal fade" id="petInfoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Información de la Mascota</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="petInfoContent">
+                    <!-- Content will be dynamically generated -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" id="adoptFromInfoBtn">
+                        <i class="fas fa-heart"></i> Adoptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adoption Form Modal -->
+    <div class="modal fade" id="adoptionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Solicitud de Adopción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="adoption-form">
+                        <div class="pet-info-summary">
+                            <div class="pet-image" id="adoptionPetImage"></div>
+                            <div class="pet-details">
+                                <h4 id="adoptionPetName"></h4>
+                                <p id="adoptionPetBreed"></p>
+                            </div>
+                        </div>
+                        
+                        <form id="adoptionForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="adopterName" class="form-label">Nombre Completo *</label>
+                                        <input type="text" class="form-control" id="adopterName" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="adopterEmail" class="form-label">Email *</label>
+                                        <input type="email" class="form-control" id="adopterEmail" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="adopterPhone" class="form-label">Teléfono *</label>
+                                        <input type="tel" class="form-control" id="adopterPhone" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="adopterAddress" class="form-label">Dirección *</label>
+                                        <input type="text" class="form-control" id="adopterAddress" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="livingSituation" class="form-label">Tipo de Vivienda *</label>
+                                <select class="form-select" id="livingSituation" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="casa">Casa con patio</option>
+                                    <option value="apartamento">Apartamento</option>
+                                    <option value="casa_sin_patio">Casa sin patio</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="experience" class="form-label">Experiencia con mascotas *</label>
+                                <select class="form-select" id="experience" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="experta">Experta (más de 5 años)</option>
+                                    <option value="intermedia">Intermedia (1-5 años)</option>
+                                    <option value="principiante">Principiante (menos de 1 año)</option>
+                                    <option value="ninguna">Ninguna experiencia</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="motivation" class="form-label">¿Por qué quieres adoptar esta mascota? *</label>
+                                <textarea class="form-control" id="motivation" rows="3" required></textarea>
+                            </div>
+                            
+                            <!-- Starter Pack Section -->
+                            <div class="starter-pack-section">
+                                <h5><i class="fas fa-gift"></i> Starter Pack de Bienvenida</h5>
+                                <div class="starter-pack-card">
+                                    <div class="pack-items">
+                                        <div class="pack-item">
+                                            <i class="fas fa-dog"></i>
+                                            <span>Collar personalizado</span>
+                                        </div>
+                                        <div class="pack-item">
+                                            <i class="fas fa-certificate"></i>
+                                            <span>Certificado de unión familiar</span>
+                                        </div>
+                                        <div class="pack-item">
+                                            <i class="fas fa-heart"></i>
+                                            <span>Kit de bienvenida</span>
+                                        </div>
+                                    </div>
+                                    <div class="pack-price">
+                                        <span class="price">$50</span>
+                                        <label class="form-check-label">
+                                            <input type="checkbox" class="form-check-input" id="includeStarterPack" checked>
+                                            Incluir Starter Pack
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="submitAdoptionBtn">
+                        <i class="fas fa-paper-plane"></i> Enviar Solicitud
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Mi Perfil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="profile-info">
+                        <div class="profile-image">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="Profile" class="rounded-circle">
+                        </div>
+                        <h4>Tu Nombre</h4>
+                        <p class="text-muted">Edad: 25</p>
+                        <p class="bio">Soy una persona apasionada por la vida, me gusta viajar y conocer nuevas culturas. ¡Busco alguien con quien compartir aventuras!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que quieres eliminar todos tus likes? Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar Todos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="data.js?v=2.0"></script>
+    <script src="script.js?v=2.0"></script>
+    
+    <!-- Verificación adicional de funciones -->
+    <script>
+        // Verificar que las funciones estén disponibles cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Verificando funciones en DOMContentLoaded...');
+            console.log('showSwipeSection:', typeof window.showSwipeSection);
+            console.log('showPetCareSection:', typeof window.showPetCareSection);
+            console.log('showDonationSection:', typeof window.showDonationSection);
+            
+            if (typeof window.showSwipeSection === 'function') {
+                console.log('✅ Todas las funciones están disponibles correctamente');
+            } else {
+                console.error('ERROR: Las funciones de navegación no están disponibles');
+                // Intentar cargar las funciones nuevamente después de un breve delay
+                setTimeout(function() {
+                    if (typeof window.showSwipeSection !== 'function') {
+                        console.error('Las funciones aún no están disponibles después del delay');
+                    }
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

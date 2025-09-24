@@ -31,8 +31,31 @@ const profiles = [
         id: 1,
         name: "Scar",
         age: "2 meses",
-        bio: "Cachorro juguetón y cariñoso. Le encanta jugar y está listo para encontrar su familia para siempre.",
+        bio: "¡Hola! Soy Scar, un cachorro muy juguetón y cariñoso. Me encanta jugar con pelotas y correr por el jardín del refugio. Estoy buscando una familia que me dé mucho amor y me enseñe a ser el mejor perro del mundo. ¿Serás tú mi familia para siempre?",
         image: "https://goldenretrieverperu.com/wp-content/uploads/2021/11/labrador-chocolate1.jpg",
+        images: [
+            "https://goldenretrieverperu.com/wp-content/uploads/2021/11/labrador-chocolate1.jpg",
+            "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop"
+        ],
+        shelterPhotos: [
+            "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop"
+        ],
+        socialVideos: [
+            {
+                title: "Scar jugando en el refugio",
+                url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                description: "Mira cómo Scar disfruta jugando con sus amigos en el refugio"
+            },
+            {
+                title: "Scar aprendiendo comandos",
+                url: "https://www.youtube.com/embed/dQw4w9WgXcQ", 
+                description: "Scar es muy inteligente y aprende rápido"
+            }
+        ],
         interests: ["Juguetón", "Lactante", "Inteligente"],
         shelter: {
             id: 1,
@@ -40,7 +63,12 @@ const profiles = [
             address: "Av. Principal 123, Lima",
             phone: "+51 999 888 777",
             website: "https://refugioesperanza.org",
-            description: "Refugio dedicado al rescate y cuidado de animales abandonados desde 2015."
+            description: "Refugio dedicado al rescate y cuidado de animales abandonados desde 2015.",
+            socialMedia: {
+                instagram: "@refugioesperanza",
+                facebook: "Refugio Esperanza Animal",
+                tiktok: "@refugioesperanza"
+            }
         },
         details: {
             breed: "Labrador Retriever",
@@ -56,8 +84,25 @@ const profiles = [
         id: 2,
         name: "Carlos",
         age: "2 años",
-        bio: "Perro adulto tranquilo y leal. Perfecto para familias que buscan un compañero fiel.",
+        bio: "¡Hola! Soy Carlos, un perro adulto muy tranquilo y leal. Me gusta mucho estar en compañía de las personas y soy muy protector con mi familia. En el refugio me conocen como el 'guardián silencioso' porque siempre estoy atento a todo. ¿Te gustaría conocerme?",
         image: "https://companionsforeverllc.com/wp-content/uploads/2024/04/IMG_1648-300x300.jpg",
+        images: [
+            "https://companionsforeverllc.com/wp-content/uploads/2024/04/IMG_1648-300x300.jpg",
+            "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop"
+        ],
+        shelterPhotos: [
+            "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop"
+        ],
+        socialVideos: [
+            {
+                title: "Carlos en su rutina diaria",
+                url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                description: "Carlos disfrutando de su paseo matutino en el refugio"
+            }
+        ],
         interests: ["Tranquilo", "Leal", "Protector"],
         shelter: {
             id: 2,
@@ -65,7 +110,12 @@ const profiles = [
             address: "Jr. Libertad 456, Arequipa",
             phone: "+51 999 777 666",
             website: "https://mascotasfelices.org",
-            description: "Organización sin fines de lucro que rescata y rehabilita animales en situación de abandono."
+            description: "Organización sin fines de lucro que rescata y rehabilita animales en situación de abandono.",
+            socialMedia: {
+                instagram: "@mascotasfelices",
+                facebook: "Casa de Mascotas Felices",
+                tiktok: "@mascotasfelices"
+            }
         },
         details: {
             breed: "Mestizo",
@@ -83,6 +133,12 @@ const profiles = [
         age: "3 años",
         bio: "Gata independiente pero cariñosa. Ideal para personas que buscan un compañero tranquilo.",
         image: "https://www.webanimales.com/ficheros/2014/03/akita-webanimales.jpg",
+        images: [
+            "https://www.webanimales.com/ficheros/2014/03/akita-webanimales.jpg",
+            "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop"
+        ],
         interests: ["Independiente", "Cariñosa", "Tranquila"],
         shelter: {
             id: 3,
@@ -108,6 +164,12 @@ const profiles = [
         age: "3 años",
         bio: "Gato curioso y aventurero. Le encanta explorar y jugar con juguetes interactivos.",
         image: "https://upload.wikimedia.org/wikipedia/commons/b/b9/%D0%A2%D0%B0%D0%B9%D1%81%D0%BA%D0%B8%D0%B9_%D0%BA%D0%BE%D1%82_%D0%9B%D1%83%D0%BB%D0%B0%D0%BC%D0%B5%D0%B9_%D0%A2%D0%B0%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%9B%D0%B5%D0%B3%D0%B5%D0%BD%D0%B4%D0%B0%2C_%D0%A7%D0%B5%D0%BC%D0%BF%D0%B8%D0%BE%D0%BD_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BF%D0%BE_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%B5_WCF%2C_%D0%BE%D0%BA%D1%80%D0%B0%D1%81_%D0%B1%D0%BB%D1%8E_%D0%BF%D0%BE%D0%B8%D0%BD%D1%82_01_%28cropped%29.jpg",
+        images: [
+            "https://upload.wikimedia.org/wikipedia/commons/b/b9/%D0%A2%D0%B0%D0%B9%D1%81%D0%BA%D0%B8%D0%B9_%D0%BA%D0%BE%D1%82_%D0%9B%D1%83%D0%BB%D0%B0%D0%BC%D0%B5%D0%B9_%D0%A2%D0%B0%D0%B9%D1%81%D0%BA%D0%B0%D1%8F_%D0%9B%D0%B5%D0%B3%D0%B5%D0%BD%D0%B4%D0%B0%2C_%D0%A7%D0%B5%D0%BC%D0%BF%D0%B8%D0%BE%D0%BD_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BF%D0%BE_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%B5_WCF%2C_%D0%BE%D0%BA%D1%80%D0%B0%D1%81_%D0%B1%D0%BB%D1%8E_%D0%BF%D0%BE%D0%B8%D0%BD%D1%82_01_%28cropped%29.jpg",
+            "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop"
+        ],
         interests: ["Curioso", "Aventurero", "Juguetón"],
         shelter: {
             id: 4,

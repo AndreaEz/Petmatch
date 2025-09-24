@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Mascotas Favoritas - Petmatch</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-fire text-danger"></i>
+                <span class="brand-text">Petmatch</span>
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="index.html" title="Inicio">
+                    <i class="fas fa-home"></i>
+                </a>
+                <a class="nav-link active" href="#" title="Mis Likes">
+                    <i class="fas fa-heart"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="favorites-page" id="favoritesPage">
+        <div class="favorites-header">
+            <div class="container">
+                <div class="favorites-nav">
+                    <a class="btn btn-outline-light" href="index.html">
+                        <i class="fas fa-arrow-left"></i> Volver al Inicio
+                    </a>
+                    <h1><i class="fas fa-heart"></i> Mis Mascotas Favoritas</h1>
+                    <p>Mascotas que te han gustado y puedes patrocinar</p>
+                </div>
+            </div>
+        </div>
+        <div class="favorites-content">
+            <div class="container">
+                <div class="favorites-grid" id="favoritesGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Carga perfiles y likes desde localStorage
+        const profilesData = typeof profiles !== 'undefined' ? profiles : [];
+        const likes = JSON.parse(localStorage.getItem('tinderLikes') || '[]');
+
+        function sponsorIndividualPet(profileId) {
+            alert('Función de patrocinar: ' + profileId);
+        }
+        function startChat(profileId) {
+            window.location.href = 'index.html#chat-' + profileId;
+        }
+        function showAdoptionForm(profileId) {
+            window.location.href = 'index.html#adopt-' + profileId;
+        }
+
+        function loadFavorites() {
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            const likedPets = profilesData.filter(p => likes.some(like => like.id === p.id));
+            if (likedPets.length === 0) {
+                favoritesGrid.innerHTML = `
+                    <div class="no-favorites">
+                        <div class="no-favorites-content">
+                            <i class="fas fa-heart"></i>
+                            <h2>No tienes mascotas favoritas aún</h2>
+                            <p>¡Explora las mascotas disponibles y dales me gusta!</p>
+                            <a class="btn btn-primary btn-lg" href="index.html">
+                                <i class="fas fa-fire"></i> Empezar a Swipear
+                            </a>
+                        </div>
+                    </div>`;
+                return;
+            }
+            favoritesGrid.innerHTML = '';
+            likedPets.forEach(pet => {
+                const card = document.createElement('div');
+                card.className = 'favorite-pet-card';
+                card.innerHTML = `
+                    <div class="favorite-pet-header">
+                        <div class="favorite-pet-image" style="background-image:url('${pet.image}')"></div>
+                        <div class="favorite-pet-intro">
+                            <h2>¡Hola! Soy ${pet.name}</h2>
+                            <p class="favorite-pet-age">Tengo ${pet.age}</p>
+                            <p class="favorite-pet-breed">Soy un ${pet.details.breed}</p>
+                            <div class="favorite-pet-personality">
+                                <span class="personality-tag">${pet.details.personality}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="favorite-pet-story">
+                        <h3><i class="fas fa-heart"></i> Mi Historia</h3>
+                        <p class="favorite-pet-bio">${pet.bio}</p>
+                    </div>
+                    <div class="favorite-pet-actions">
+                        <button class="btn btn-success btn-lg" onclick="sponsorIndividualPet(${pet.id})"><i class="fas fa-heart"></i> Patrocinarme</button>
+                        <button class="btn btn-primary btn-lg" onclick="startChat(${pet.id})"><i class="fas fa-comments"></i> Chatear conmigo</button>
+                        <button class="btn btn-outline-primary btn-lg" onclick="showAdoptionForm(${pet.id})"><i class="fas fa-home"></i> Adoptarme</button>
+                    </div>`;
+                favoritesGrid.appendChild(card);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadFavorites);
+    </script>
+</body>
+</html>
+
+

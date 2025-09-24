@@ -134,7 +134,7 @@ function showWelcomeScreen() {
     console.log('Navegando a pantalla de bienvenida...');
     try {
         // Ocultar todas las secciones
-        const sections = ['swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection'];
+        const sections = ['swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection', 'adoptionSection', 'publishSection'];
         sections.forEach(sectionId => {
             const element = document.getElementById(sectionId);
             if (element) {
@@ -155,11 +155,80 @@ function showWelcomeScreen() {
     }
 }
 
+/**
+ * Muestra la sección de adopción (Netflix style)
+ */
+function showAdoptionSection() {
+    console.log('Navegando a sección de adopción...');
+    try {
+        // Ocultar todas las secciones
+        const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection', 'publishSection'];
+        sections.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.classList.add('d-none');
+            }
+        });
+        
+        // Mostrar sección de adopción
+        const adoptionSection = document.getElementById('adoptionSection');
+        if (adoptionSection) {
+            adoptionSection.classList.remove('d-none');
+            console.log('Sección de adopción mostrada');
+            // Cargar mascotas en estilo Netflix
+            loadPetsGrid();
+            // Cargar test de compatibilidad
+            loadCompatibilityTest();
+            
+            // Mostrar test automáticamente si es la primera vez
+            if (isFirstTimeUser()) {
+                setTimeout(() => {
+                    showCompatibilityTestModal();
+                }, 500); // Pequeño delay para que se cargue la sección
+            }
+        } else {
+            console.error('Elemento adoptionSection no encontrado');
+        }
+    } catch (error) {
+        console.error('Error en showAdoptionSection:', error);
+    }
+}
+
+/**
+ * Muestra la sección de publicación
+ */
+function showPublishSection() {
+    console.log('Navegando a sección de publicación...');
+    try {
+        // Ocultar todas las secciones
+        const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection', 'adoptionSection'];
+        sections.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.classList.add('d-none');
+            }
+        });
+        
+        // Mostrar sección de publicación
+        const publishSection = document.getElementById('publishSection');
+        if (publishSection) {
+            publishSection.classList.remove('d-none');
+            console.log('Sección de publicación mostrada');
+        } else {
+            console.error('Elemento publishSection no encontrado');
+        }
+    } catch (error) {
+        console.error('Error en showPublishSection:', error);
+    }
+}
+
 // Asignar las funciones al objeto window inmediatamente después de definirlas
 window.showSwipeSection = showSwipeSection;
 window.showPetCareSection = showPetCareSection;
 window.showDonationSection = showDonationSection;
 window.showWelcomeScreen = showWelcomeScreen;
+window.showAdoptionSection = showAdoptionSection;
+window.showPublishSection = showPublishSection;
 
 console.log('Funciones de navegación cargadas y disponibles globalmente');
 console.log('showSwipeSection disponible:', typeof window.showSwipeSection);
@@ -234,6 +303,7 @@ function initializeApp() {
     const savedMatches = localStorage.getItem('tinderMatches');
     const savedLikes = localStorage.getItem('tinderLikes');
     const savedMessages = localStorage.getItem('tinderMessages');
+    const savedPublishedPets = localStorage.getItem('publishedPets');
     
     // Restaurar matches si existen
     if (savedMatches) {
@@ -248,6 +318,17 @@ function initializeApp() {
     // Restaurar mensajes si existen
     if (savedMessages) {
         messages = JSON.parse(savedMessages);
+    }
+    
+    // Restaurar mascotas publicadas si existen
+    if (savedPublishedPets) {
+        const publishedPets = JSON.parse(savedPublishedPets);
+        // Añadir mascotas publicadas a la base de datos
+        publishedPets.forEach(pet => {
+            if (!profilesData.find(p => p.id === pet.id)) {
+                profilesData.push(pet);
+            }
+        });
     }
 }
 
@@ -343,7 +424,11 @@ function setupEventListeners() {
     
     // Botones de navegación entre secciones
     document.getElementById('homeBtn').addEventListener('click', showWelcomeScreen);
-    document.getElementById('likesBtn').addEventListener('click', showLikesSection);
+    // Si el corazón es un enlace a favorites.html, no sobreescribir navegación SPA
+    const likesBtn = document.getElementById('likesBtn');
+    if (likesBtn && (!likesBtn.getAttribute('href') || likesBtn.getAttribute('href') === '#')) {
+        likesBtn.addEventListener('click', showLikesSection);
+    }
     document.getElementById('matchesBtn').addEventListener('click', showMatchesSection);
     document.getElementById('profileBtn').addEventListener('click', showProfile);
     document.getElementById('backToSwipeBtn').addEventListener('click', showSwipeSection);
@@ -351,6 +436,25 @@ function setupEventListeners() {
     document.getElementById('backToMatchesBtn').addEventListener('click', showMatchesSection);
     document.getElementById('backToWelcomeBtn').addEventListener('click', showWelcomeScreen);
     document.getElementById('backToWelcomeFromDonationBtn').addEventListener('click', showWelcomeScreen);
+    document.getElementById('backToWelcomeFromSwipeBtn').addEventListener('click', showWelcomeScreen);
+    document.getElementById('backToWelcomeFromFavoritesBtn').addEventListener('click', showWelcomeScreen);
+    
+    // Event listeners para botones del modal de información
+    document.getElementById('likeFromInfoBtn').addEventListener('click', function() {
+        if (currentAdoptionPet) {
+            likePet(currentAdoptionPet.id);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('petInfoModal'));
+            if (modal) modal.hide();
+        }
+    });
+    
+    document.getElementById('chatFromInfoBtn').addEventListener('click', function() {
+        if (currentAdoptionPet) {
+            startChat(currentAdoptionPet.id);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('petInfoModal'));
+            if (modal) modal.hide();
+        }
+    });
     
     // Botones de adopción y modales de perfil
     const adoptFromProfileBtn = document.getElementById('adoptFromProfileBtn');
@@ -358,12 +462,7 @@ function setupEventListeners() {
     const adoptFromChatBtn = document.getElementById('adoptFromChatBtn');
     const submitAdoptionBtn = document.getElementById('submitAdoptionBtn');
     
-    if (adoptFromProfileBtn) {
-        adoptFromProfileBtn.addEventListener('click', showAdoptionForm);
-        console.log('Event listener adoptFromProfileBtn configurado');
-    } else {
-        console.error('Botón adoptFromProfileBtn no encontrado');
-    }
+    // Botón eliminado del DOM para evitar duplicado; no configurar listener
     
     if (adoptFromInfoBtn) {
         adoptFromInfoBtn.addEventListener('click', showAdoptionForm);
@@ -407,6 +506,43 @@ function setupEventListeners() {
         modal.hide();
         showMessagesSection(currentChat);
     });
+    
+    // Formulario de publicación
+    const publishForm = document.getElementById('publishPetForm');
+    if (publishForm) {
+        publishForm.addEventListener('submit', handlePublishForm);
+    }
+    
+    // Botón de aplicar resultados del test
+    const applyTestResultsBtn = document.getElementById('applyTestResultsBtn');
+    if (applyTestResultsBtn) {
+        applyTestResultsBtn.addEventListener('click', applyTestResults);
+    }
+    
+    // Botón de saltar test
+    const skipTestBtn = document.getElementById('skipTestBtn');
+    if (skipTestBtn) {
+        skipTestBtn.addEventListener('click', function() {
+            // Marcar que el usuario ya ha visto el test
+            markTestAsSeen();
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('compatibilityTestModal'));
+            modal.hide();
+            showToast('Test saltado. Puedes realizarlo más tarde desde el botón "Realizar Test de Compatibilidad"', 'info');
+        });
+    }
+    
+    // Botones de navegación adicionales
+    const backToWelcomeFromAdoptionBtn = document.getElementById('backToWelcomeFromAdoptionBtn');
+    const backToWelcomeFromPublishBtn = document.getElementById('backToWelcomeFromPublishBtn');
+    
+    if (backToWelcomeFromAdoptionBtn) {
+        backToWelcomeFromAdoptionBtn.addEventListener('click', showWelcomeScreen);
+    }
+    
+    if (backToWelcomeFromPublishBtn) {
+        backToWelcomeFromPublishBtn.addEventListener('click', showWelcomeScreen);
+    }
 }
 
 /**
@@ -666,15 +802,27 @@ function showProfile() {
 
 
 function showLikesSection() {
-    document.getElementById('welcomeScreen').classList.add('d-none');
-    document.getElementById('swipeContainer').classList.add('d-none');
-    document.getElementById('likesSection').classList.remove('d-none');
-    document.getElementById('matchesSection').classList.add('d-none');
-    document.getElementById('messagesSection').classList.add('d-none');
-    document.getElementById('petCareSection').classList.add('d-none');
-    document.getElementById('donationSection').classList.add('d-none');
+    console.log('showLikesSection llamada');
+    console.log('Likes actuales:', likes);
     
-    displayLikes();
+    // Ocultar todas las secciones
+    const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection', 'adoptionSection', 'publishSection', 'favoritesPage'];
+    sections.forEach(sectionId => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.classList.add('d-none');
+        }
+    });
+    
+    // Mostrar página dedicada de favoritos
+    const favoritesPage = document.getElementById('favoritesPage');
+    if (favoritesPage) {
+        favoritesPage.classList.remove('d-none');
+        loadFavorites();
+        console.log('Página de favoritos mostrada');
+    } else {
+        console.error('No se encontró la página favoritesPage');
+    }
 }
 
 function showMatchesSection() {
@@ -690,22 +838,31 @@ function showMatchesSection() {
 }
 
 function showMessagesSection(profile) {
-    document.getElementById('welcomeScreen').classList.add('d-none');
-    document.getElementById('swipeContainer').classList.add('d-none');
-    document.getElementById('likesSection').classList.add('d-none');
-    document.getElementById('matchesSection').classList.add('d-none');
-    document.getElementById('messagesSection').classList.remove('d-none');
-    document.getElementById('petCareSection').classList.add('d-none');
-    document.getElementById('donationSection').classList.add('d-none');
+    // Ocultar todas las secciones
+    const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'matchesSection', 'petCareSection', 'donationSection', 'adoptionSection', 'publishSection', 'favoritesPage'];
+    sections.forEach(sectionId => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.classList.add('d-none');
+        }
+    });
     
-    currentChat = profile;
-    document.getElementById('chatUserName').textContent = profile.name;
-    const chatProfileImage = document.getElementById('chatProfileImage');
-    chatProfileImage.style.backgroundImage = `url('${profile.image}')`;
-    chatProfileImage.style.cursor = 'pointer';
-    chatProfileImage.title = 'Click para ver información detallada';
-    chatProfileImage.onclick = () => showPetInfoModal(profile.id);
-    displayMessages(profile.id);
+    // Mostrar sección de mensajes
+    const messagesSection = document.getElementById('messagesSection');
+    if (messagesSection) {
+        messagesSection.classList.remove('d-none');
+    }
+    
+    if (profile) {
+        currentChat = profile;
+        document.getElementById('chatUserName').textContent = profile.name;
+        const chatProfileImage = document.getElementById('chatProfileImage');
+        chatProfileImage.style.backgroundImage = `url('${profile.image}')`;
+        chatProfileImage.style.cursor = 'pointer';
+        chatProfileImage.title = 'Click para ver información detallada';
+        chatProfileImage.onclick = () => showPetInfoModal(profile.id);
+        displayMessages(profile.id);
+    }
 }
 
 function displayLikes() {
@@ -834,7 +991,37 @@ function displayMessages(profileId) {
     const profileMessages = messages[profileId] || [];
     
     if (profileMessages.length === 0) {
-        messagesContainer.innerHTML = '<p class="text-center text-muted">¡Envía el primer mensaje!</p>';
+        // Agregar mensaje automático del animal si no hay mensajes
+        const autoMessage = getRandomAutoMessage();
+        const messageWrapper = document.createElement('div');
+        messageWrapper.className = 'message-with-profile';
+        
+        const profileIcon = document.createElement('div');
+        profileIcon.className = 'message-profile-icon';
+        profileIcon.style.backgroundImage = `url('${currentChat.image}')`;
+        messageWrapper.appendChild(profileIcon);
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message received';
+        messageDiv.textContent = autoMessage;
+        
+        messageContent.appendChild(messageDiv);
+        messageWrapper.appendChild(messageContent);
+        messagesContainer.appendChild(messageWrapper);
+        
+        // Guardar el mensaje automático
+        if (!messages[profileId]) {
+            messages[profileId] = [];
+        }
+        messages[profileId].push({
+            text: autoMessage,
+            sent: false,
+            timestamp: new Date().toISOString()
+        });
+        saveMessages();
         return;
     }
     
@@ -1017,15 +1204,31 @@ function showDetailedProfile(profileId) {
     const profile = profilesData.find(p => p.id === profileId);
     if (!profile) return;
     
+    // Usar las fotos del perfil o generar fotos adicionales si no existen
+    const additionalPhotos = profile.images || [
+        profile.image,
+        "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop"
+    ];
+    
     const content = document.getElementById('detailedProfileContent');
     content.innerHTML = `
         <div class="detailed-profile-content">
-            <div class="profile-image-large" style="background-image: url('${profile.image}')"></div>
+            <div class="profile-photos-section">
+                <h4><i class="fas fa-images"></i> Fotos de ${profile.name}</h4>
+                <div class="profile-photos-grid">
+                    <div class="profile-photo main" style="background-image: url('${additionalPhotos[0]}')" onclick="showPhotoModal('${additionalPhotos[0]}')"></div>
+                    <div class="profile-photo" style="background-image: url('${additionalPhotos[1]}')" onclick="showPhotoModal('${additionalPhotos[1]}')"></div>
+                    <div class="profile-photo" style="background-image: url('${additionalPhotos[2]}')" onclick="showPhotoModal('${additionalPhotos[2]}')"></div>
+                    <div class="profile-photo" style="background-image: url('${additionalPhotos[3]}')" onclick="showPhotoModal('${additionalPhotos[3]}')"></div>
+                </div>
+            </div>
             <div class="profile-details">
                 <h3>${profile.name}</h3>
                 <div class="detail-item">
                     <span class="detail-label">Edad:</span>
-                    <span class="detail-value">${profile.details.age}</span>
+                    <span class="detail-value">${profile.age}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Raza:</span>
@@ -1066,6 +1269,20 @@ function showDetailedProfile(profileId) {
                         <i class="fas fa-globe"></i> Visitar sitio web
                     </a></p>
                 </div>
+                
+                <div class="profile-actions">
+                    <button class="btn btn-success btn-lg" onclick="showAdoptionForm(${profile.id})">
+                        <i class="fas fa-heart"></i> Adoptar
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="startChat(${profile.id})">
+                        <i class="fas fa-comments"></i> Chat
+                    </button>
+                    ${profile.shelter ? `
+                        <button class="btn btn-outline-danger btn-lg" onclick="likePet(${profile.id})">
+                            <i class="fas fa-heart"></i> Me Gusta
+                        </button>
+                    ` : ''}
+                </div>
             </div>
         </div>
     `;
@@ -1099,17 +1316,121 @@ function showAdoptionForm(profileId) {
         return;
     }
     
+    // Generar formulario de adopción con starter pack
+    const formContent = document.getElementById('adoptionFormContent');
+    formContent.innerHTML = `
+        <div class="adoption-form-content">
+            <div class="pet-info-adoption">
+                <div class="pet-image-adoption" style="background-image: url('${profile.image}')"></div>
+                <div class="pet-details-adoption">
+                    <h4>${profile.name}</h4>
+                    <p>${profile.details.breed} - ${profile.age}</p>
+                    <p class="pet-description-adoption">${profile.bio}</p>
+                </div>
+            </div>
+            
+            <div class="starter-pack-section">
+                <h5><i class="fas fa-gift"></i> Starter Pack de Adopción</h5>
+                <p>¿Te gustaría incluir un paquete de bienvenida para ${profile.name}?</p>
+                
+                <div class="starter-pack-options">
+                    <div class="starter-pack-option">
+                        <input type="radio" name="starterPack" value="basic" id="basicPack" checked>
+                        <label for="basicPack" class="starter-pack-card">
+                            <div class="pack-icon">🎁</div>
+                            <h6>Paquete Básico - $50</h6>
+                            <ul>
+                                <li>Collar personalizado</li>
+                                <li>Certificado de adopción</li>
+                                <li>Comida para 1 mes</li>
+                            </ul>
+                        </label>
+                    </div>
+                    
+                    <div class="starter-pack-option">
+                        <input type="radio" name="starterPack" value="premium" id="premiumPack">
+                        <label for="premiumPack" class="starter-pack-card">
+                            <div class="pack-icon">💎</div>
+                            <h6>Paquete Premium - $100</h6>
+                            <ul>
+                                <li>Collar personalizado</li>
+                                <li>Certificado de adopción</li>
+                                <li>Comida para 2 meses</li>
+                                <li>Juguetes variados</li>
+                                <li>Cama cómoda</li>
+                            </ul>
+                        </label>
+                    </div>
+                    
+                    <div class="starter-pack-option">
+                        <input type="radio" name="starterPack" value="none" id="noPack">
+                        <label for="noPack" class="starter-pack-card">
+                            <div class="pack-icon">❌</div>
+                            <h6>Sin Paquete</h6>
+                            <p>Solo adopción</p>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="adoption-form-fields">
+                <h5><i class="fas fa-user"></i> Información Personal</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="adopterName">Nombre Completo *</label>
+                            <input type="text" class="form-control" id="adopterName" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="adopterEmail">Email *</label>
+                            <input type="email" class="form-control" id="adopterEmail" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="adopterPhone">Teléfono *</label>
+                            <input type="tel" class="form-control" id="adopterPhone" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="adopterAddress">Dirección *</label>
+                            <input type="text" class="form-control" id="adopterAddress" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adoptionReason">¿Por qué quieres adoptar a ${profile.name}? *</label>
+                    <textarea class="form-control" id="adoptionReason" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="petExperience">Experiencia con mascotas</label>
+                    <textarea class="form-control" id="petExperience" rows="2"></textarea>
+                </div>
+            </div>
+            
+            <div class="adoption-form-actions">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="submitAdoptionForm(${profile.id})">
+                    <i class="fas fa-heart"></i> Enviar Solicitud de Adopción
+                </button>
+            </div>
+        </div>
+    `;
+    
+    const adoptionModal = new bootstrap.Modal(document.getElementById('adoptionFormModal'));
+    adoptionModal.show();
+    
     console.log('Perfil seleccionado para adopción:', profile);
     
     currentAdoptionPet = profile;
-    
-    // Fill form with pet info
-    document.getElementById('adoptionPetImage').style.backgroundImage = `url('${profile.image}')`;
-    document.getElementById('adoptionPetName').textContent = profile.name;
-    document.getElementById('adoptionPetBreed').textContent = profile.details.breed;
-    
-    const modal = new bootstrap.Modal(document.getElementById('adoptionModal'));
-    modal.show();
 }
 
 function submitAdoptionForm() {
@@ -1190,7 +1511,7 @@ function showPetInfoModal(profileId) {
                 <h3>${profile.name}</h3>
                 <div class="detail-item-info">
                     <span class="detail-label-info">Edad:</span>
-                    <span class="detail-value-info">${profile.details.age}</span>
+                    <span class="detail-value-info">${profile.age}</span>
                 </div>
                 <div class="detail-item-info">
                     <span class="detail-label-info">Raza:</span>
@@ -1247,6 +1568,1038 @@ function showPetInfoModal(profileId) {
     
     const modal = new bootstrap.Modal(document.getElementById('petInfoModal'));
     modal.show();
+}
+
+// ===========================================
+// NUEVAS FUNCIONALIDADES - ADOPCIÓN Y PUBLICACIÓN
+// ===========================================
+
+/**
+ * Carga el grid de mascotas en estilo Netflix
+ */
+function loadPetsGrid() {
+    const petsGrid = document.getElementById('petsGrid');
+    if (!petsGrid) return;
+    
+    petsGrid.innerHTML = '';
+    
+    profilesData.forEach(profile => {
+        const petCard = document.createElement('div');
+        petCard.className = 'pet-card';
+        petCard.innerHTML = `
+            <div class="pet-card-image" style="background-image: url('${profile.image}')">
+                <div class="pet-card-overlay">
+                    <button class="btn btn-light btn-sm" onclick="showPetDetails(${profile.id})">
+                        <i class="fas fa-info-circle"></i> Ver Detalles
+                    </button>
+                </div>
+            </div>
+            <div class="pet-card-info">
+                <div class="pet-card-name">${profile.name}</div>
+                <div class="pet-card-breed">${profile.details.breed}</div>
+                <div class="pet-card-age">${profile.age}</div>
+                <div class="pet-card-description">${profile.bio}</div>
+                <div class="pet-card-actions">
+                    <button class="pet-card-btn primary" onclick="showPetDetails(${profile.id})">
+                        <i class="fas fa-info-circle"></i> Más Detalles
+                    </button>
+                </div>
+            </div>
+        `;
+        petsGrid.appendChild(petCard);
+    });
+}
+
+/**
+ * Muestra el modal del test de compatibilidad
+ */
+function showCompatibilityTestModal() {
+    const modal = new bootstrap.Modal(document.getElementById('compatibilityTestModal'));
+    loadCompatibilityTestModal();
+    modal.show();
+}
+
+// Variables globales para el test paso a paso
+let currentTestStep = 0;
+let testQuestions = [];
+let testAnswers = {};
+
+/**
+ * Carga el test de compatibilidad en el modal
+ */
+function loadCompatibilityTestModal() {
+    const testContainer = document.getElementById('modalTestQuestions');
+    if (!testContainer) return;
+    
+    // Obtener tipos de animales disponibles en la base de datos
+    const availableAnimals = getAvailableAnimalTypes();
+    
+    testQuestions = [
+        {
+            id: 'animalType',
+            question: '¿Qué tipo de animal te gustaría adoptar?',
+            options: availableAnimals
+        },
+        {
+            id: 'lifestyle',
+            question: '¿Cuál es tu estilo de vida?',
+            options: [
+                { value: 'active', text: 'Muy activo', description: 'Me gusta hacer ejercicio y salir' },
+                { value: 'moderate', text: 'Moderadamente activo', description: 'Me gusta caminar y actividades suaves' },
+                { value: 'calm', text: 'Tranquilo', description: 'Prefiero actividades relajadas en casa' }
+            ]
+        },
+        {
+            id: 'time',
+            question: '¿Cuánto tiempo puedes dedicar a una mascota?',
+            options: [
+                { value: 'lots', text: 'Mucho tiempo', description: 'Varias horas al día' },
+                { value: 'moderate', text: 'Tiempo moderado', description: '1-2 horas al día' },
+                { value: 'limited', text: 'Tiempo limitado', description: 'Menos de 1 hora al día' }
+            ]
+        },
+        {
+            id: 'space',
+            question: '¿Qué tipo de espacio tienes?',
+            options: [
+                { value: 'house', text: 'Casa con patio', description: 'Espacio amplio para correr' },
+                { value: 'apartment', text: 'Apartamento', description: 'Espacio moderado' },
+                { value: 'small', text: 'Espacio pequeño', description: 'Apartamento pequeño' }
+            ]
+        }
+    ];
+    
+    // Inicializar variables
+    currentTestStep = 0;
+    testAnswers = {};
+    
+    // Mostrar primera pregunta
+    showTestQuestion(0);
+    
+    // Configurar navegación
+    setupTestNavigation();
+}
+
+/**
+ * Muestra una pregunta específica del test
+ */
+function showTestQuestion(step) {
+    const testContainer = document.getElementById('modalTestQuestions');
+    const question = testQuestions[step];
+    
+    testContainer.innerHTML = `
+        <div class="test-question">
+            <h4>${question.question}</h4>
+            <div class="test-options">
+                ${question.options.map(option => `
+                    <label class="test-option">
+                        <input type="radio" name="${question.id}" value="${option.value}">
+                        <div class="option-content">
+                            <div class="option-title">${option.text}</div>
+                            ${option.description ? `<div class="option-description">${option.description}</div>` : ''}
+                        </div>
+                    </label>
+                `).join('')}
+            </div>
+            </div>
+        `;
+    
+    // Añadir event listeners para las opciones
+    testContainer.querySelectorAll('.test-option').forEach(option => {
+        option.addEventListener('click', function() {
+            // Remover selección previa del mismo grupo
+            const name = this.querySelector('input').name;
+            testContainer.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+                input.closest('.test-option').classList.remove('selected');
+            });
+            
+            // Seleccionar la opción actual
+            this.classList.add('selected');
+            this.querySelector('input').checked = true;
+            
+            // Guardar respuesta
+            testAnswers[question.id] = this.querySelector('input').value;
+        });
+    });
+    
+    // Restaurar respuesta si existe
+    if (testAnswers[question.id]) {
+        const selectedInput = testContainer.querySelector(`input[value="${testAnswers[question.id]}"]`);
+        if (selectedInput) {
+            selectedInput.checked = true;
+            selectedInput.closest('.test-option').classList.add('selected');
+        }
+    }
+    
+    // Actualizar progreso
+    updateTestProgress();
+}
+
+/**
+ * Configura la navegación del test
+ */
+function setupTestNavigation() {
+    const prevBtn = document.getElementById('prevQuestionBtn');
+    const nextBtn = document.getElementById('nextQuestionBtn');
+    const applyBtn = document.getElementById('applyTestResultsBtn');
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+            if (currentTestStep > 0) {
+                currentTestStep--;
+                showTestQuestion(currentTestStep);
+                updateNavigationButtons();
+            }
+        });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+            if (currentTestStep < testQuestions.length - 1) {
+                currentTestStep++;
+                showTestQuestion(currentTestStep);
+                updateNavigationButtons();
+            } else {
+                // Última pregunta - aplicar filtros
+                applyTestResults();
+            }
+        });
+    }
+    
+    updateNavigationButtons();
+}
+
+/**
+ * Actualiza los botones de navegación
+ */
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prevQuestionBtn');
+    const nextBtn = document.getElementById('nextQuestionBtn');
+    const applyBtn = document.getElementById('applyTestResultsBtn');
+    
+    if (prevBtn) {
+        prevBtn.style.display = currentTestStep > 0 ? 'block' : 'none';
+    }
+    
+    if (nextBtn) {
+        if (currentTestStep === testQuestions.length - 1) {
+            nextBtn.innerHTML = 'Finalizar <i class="fas fa-check"></i>';
+            nextBtn.className = 'btn btn-success';
+        } else {
+            nextBtn.innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+            nextBtn.className = 'btn btn-light';
+        }
+    }
+}
+
+/**
+ * Actualiza la barra de progreso
+ */
+function updateTestProgress() {
+    const currentStepEl = document.getElementById('currentStep');
+    const totalStepsEl = document.getElementById('totalSteps');
+    const progressFill = document.getElementById('progressFill');
+    
+    if (currentStepEl) currentStepEl.textContent = currentTestStep + 1;
+    if (totalStepsEl) totalStepsEl.textContent = testQuestions.length;
+    if (progressFill) {
+        const progress = ((currentTestStep + 1) / testQuestions.length) * 100;
+        progressFill.style.width = progress + '%';
+    }
+}
+
+/**
+ * Obtiene los tipos de animales disponibles en la base de datos
+ */
+function getAvailableAnimalTypes() {
+    const animalTypes = new Set();
+    
+    profilesData.forEach(pet => {
+        // Extraer tipo de animal de la raza o detalles
+        const breed = pet.details.breed.toLowerCase();
+        if (breed.includes('perro') || breed.includes('dog') || breed.includes('labrador') || breed.includes('golden') || breed.includes('akita')) {
+            animalTypes.add('perro');
+        } else if (breed.includes('gato') || breed.includes('cat') || breed.includes('siamés') || breed.includes('persa')) {
+            animalTypes.add('gato');
+        } else {
+            animalTypes.add('otro');
+        }
+    });
+    
+    // Convertir a opciones del test
+    const options = [];
+    if (animalTypes.has('perro')) {
+        options.push({ value: 'perro', text: '🐕 Perro', description: 'Compañero leal y activo' });
+    }
+    if (animalTypes.has('gato')) {
+        options.push({ value: 'gato', text: '🐱 Gato', description: 'Independiente y cariñoso' });
+    }
+    if (animalTypes.has('otro')) {
+        options.push({ value: 'otro', text: '🐾 Otro', description: 'Otras mascotas disponibles' });
+    }
+    
+    return options;
+}
+
+/**
+ * Verifica si es la primera vez que el usuario visita la sección de adopción
+ */
+function isFirstTimeUser() {
+    return !localStorage.getItem('hasSeenAdoptionTest');
+}
+
+/**
+ * Marca que el usuario ya ha visto el test
+ */
+function markTestAsSeen() {
+    localStorage.setItem('hasSeenAdoptionTest', 'true');
+}
+
+/**
+ * Carga el test de compatibilidad (versión antigua para compatibilidad)
+ */
+function loadCompatibilityTest() {
+    // Esta función se mantiene para compatibilidad pero ya no se usa
+    console.log('loadCompatibilityTest called - using modal version instead');
+}
+
+/**
+ * Aplica filtros a las mascotas
+ */
+function applyFilters() {
+    const animalType = document.getElementById('animalTypeFilter').value;
+    const size = document.getElementById('sizeFilter').value;
+    const age = document.getElementById('ageFilter').value;
+    
+    let filteredPets = [...profilesData];
+    
+    if (animalType) {
+        filteredPets = filteredPets.filter(pet => 
+            pet.details.breed.toLowerCase().includes(animalType.toLowerCase())
+        );
+    }
+    
+    if (size) {
+        filteredPets = filteredPets.filter(pet => 
+            pet.details.size.toLowerCase() === size.toLowerCase()
+        );
+    }
+    
+    if (age) {
+        filteredPets = filteredPets.filter(pet => {
+            const petAge = pet.age.toLowerCase();
+            if (age === 'cachorro') return petAge.includes('mes') || petAge.includes('año') && parseInt(petAge) < 2;
+            if (age === 'joven') return petAge.includes('año') && parseInt(petAge) >= 2 && parseInt(petAge) < 5;
+            if (age === 'adulto') return petAge.includes('año') && parseInt(petAge) >= 5;
+            return true;
+        });
+    }
+    
+    // Actualizar el grid con mascotas filtradas
+    updatePetsGrid(filteredPets);
+}
+
+/**
+ * Limpia los filtros
+ */
+function clearFilters() {
+    document.getElementById('animalTypeFilter').value = '';
+    document.getElementById('sizeFilter').value = '';
+    document.getElementById('ageFilter').value = '';
+    loadPetsGrid();
+}
+
+/**
+ * Actualiza el grid de mascotas con una lista filtrada
+ */
+function updatePetsGrid(pets) {
+    const petsGrid = document.getElementById('petsGrid');
+    if (!petsGrid) return;
+    
+    petsGrid.innerHTML = '';
+    
+    if (pets.length === 0) {
+        petsGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No se encontraron mascotas</h3>
+                <p>Intenta ajustar los filtros para ver más resultados</p>
+            </div>
+        `;
+        return;
+    }
+    
+    pets.forEach(profile => {
+        const petCard = document.createElement('div');
+        petCard.className = 'pet-card';
+        petCard.innerHTML = `
+            <div class="pet-card-image" style="background-image: url('${profile.image}')">
+                <div class="pet-card-overlay">
+                    <button class="btn btn-light btn-sm" onclick="showPetDetails(${profile.id})">
+                        <i class="fas fa-info-circle"></i> Ver Detalles
+                    </button>
+                </div>
+            </div>
+            <div class="pet-card-info">
+                <div class="pet-card-name">${profile.name}</div>
+                <div class="pet-card-breed">${profile.details.breed}</div>
+                <div class="pet-card-age">${profile.age}</div>
+                <div class="pet-card-description">${profile.bio}</div>
+                <div class="pet-card-actions">
+                    <button class="pet-card-btn primary" onclick="showPetDetails(${profile.id})">
+                        <i class="fas fa-info-circle"></i> Más Detalles
+                    </button>
+                </div>
+            </div>
+        `;
+        petsGrid.appendChild(petCard);
+    });
+}
+
+/**
+ * Aplica los resultados del test de compatibilidad
+ */
+function applyTestResults() {
+    // Usar las respuestas del test paso a paso
+    const answers = testAnswers;
+    
+    // Verificar que se hayan respondido todas las preguntas
+    const requiredQuestions = ['animalType', 'lifestyle', 'time', 'space'];
+    const answeredQuestions = Object.keys(answers);
+    
+    if (answeredQuestions.length < requiredQuestions.length) {
+        showToast('Por favor responde todas las preguntas del test', 'error');
+        return;
+    }
+    
+    // Marcar que el usuario ya ha visto el test
+    markTestAsSeen();
+    
+    // Calcular compatibilidad basada en respuestas
+    let compatiblePets = [...profilesData];
+    
+    // Filtrar por tipo de animal
+    if (answers.animalType) {
+        compatiblePets = compatiblePets.filter(pet => {
+            const breed = pet.details.breed.toLowerCase();
+            if (answers.animalType === 'perro') {
+                return breed.includes('perro') || breed.includes('dog') || breed.includes('labrador') || breed.includes('golden') || breed.includes('akita');
+            } else if (answers.animalType === 'gato') {
+                return breed.includes('gato') || breed.includes('cat') || breed.includes('siamés') || breed.includes('persa');
+            } else if (answers.animalType === 'otro') {
+                return !breed.includes('perro') && !breed.includes('gato') && !breed.includes('dog') && !breed.includes('cat');
+            }
+            return true;
+        });
+    }
+    
+    // Filtrar basado en estilo de vida
+    if (answers.lifestyle === 'active') {
+        compatiblePets = compatiblePets.filter(pet => 
+            pet.details.personality.toLowerCase().includes('juguetón') || 
+            pet.details.personality.toLowerCase().includes('activo')
+        );
+    } else if (answers.lifestyle === 'calm') {
+        compatiblePets = compatiblePets.filter(pet => 
+            pet.details.personality.toLowerCase().includes('tranquilo') || 
+            pet.details.personality.toLowerCase().includes('calmado')
+        );
+    }
+    
+    // Filtrar por espacio
+    if (answers.space === 'small') {
+        compatiblePets = compatiblePets.filter(pet => 
+            pet.details.size.toLowerCase() === 'pequeño'
+        );
+    } else if (answers.space === 'apartment') {
+        compatiblePets = compatiblePets.filter(pet => 
+            pet.details.size.toLowerCase() !== 'grande'
+        );
+    }
+    
+    // Filtrar por tiempo disponible
+    if (answers.time === 'limited') {
+        compatiblePets = compatiblePets.filter(pet => 
+            pet.details.personality.toLowerCase().includes('tranquilo') ||
+            pet.details.personality.toLowerCase().includes('dócil')
+        );
+    }
+    
+    // Mostrar resultados
+    updatePetsGrid(compatiblePets);
+    
+    // Cerrar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('compatibilityTestModal'));
+    modal.hide();
+    
+    // Mostrar mensaje de resultados
+    showToast(`Se encontraron ${compatiblePets.length} mascotas compatibles con tu perfil`, 'success');
+}
+
+/**
+ * Muestra sugerencias basadas en el test de compatibilidad (versión antigua)
+ */
+function showCompatibilityResults() {
+    // Esta función se mantiene para compatibilidad
+    console.log('showCompatibilityResults called - using modal version instead');
+}
+
+/**
+ * Da like a una mascota desde el grid
+ */
+function likePet(profileId) {
+    console.log('likePet llamada con ID:', profileId);
+    const profile = profilesData.find(p => p.id === profileId);
+    if (profile) {
+        console.log('Perfil encontrado:', profile.name);
+        addToLikes(profile, 'like');
+        showToast(`¡Te gusta ${profile.name}!`, 'success');
+    } else {
+        console.error('No se encontró el perfil con ID:', profileId);
+    }
+}
+
+/**
+ * Muestra detalles de una mascota
+ */
+function showPetDetails(profileId) {
+    showDetailedProfile(profileId);
+}
+
+/**
+ * Maneja la subida de fotos
+ */
+function handlePhotoUpload(input, photoNumber) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const photoItem = document.getElementById(`photo${photoNumber}`);
+            photoItem.innerHTML = `
+                <img src="${e.target.result}" class="photo-preview" alt="Foto ${photoNumber}">
+                <button class="btn btn-sm btn-danger photo-remove" onclick="removePhoto(${photoNumber})" style="position: absolute; top: 5px; right: 5px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+/**
+ * Remueve una foto
+ */
+function removePhoto(photoNumber) {
+    const photoItem = document.getElementById(`photo${photoNumber}`);
+    photoItem.innerHTML = `
+        <div class="photo-upload-placeholder">
+            <i class="fas fa-camera"></i>
+            <span>Foto ${photoNumber}</span>
+        </div>
+        <input type="file" class="photo-input" accept="image/*" onchange="handlePhotoUpload(this, ${photoNumber})">
+    `;
+}
+
+/**
+ * Apadrina una mascota
+ */
+function sponsorPet(petId) {
+    const petNames = ['Luna', 'Max', 'Mittens'];
+    const amounts = [25, 30, 20];
+    const petName = petNames[petId - 1] || 'Mascota';
+    const amount = amounts[petId - 1] || 25;
+    
+    showToast(`¡Gracias por apadrinar a ${petName}! Tu contribución de $${amount}/mes les ayudará mucho.`, 'success');
+}
+
+/**
+ * Maneja el envío del formulario de publicación
+ */
+function handlePublishForm(event) {
+    event.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('petName').value,
+        age: document.getElementById('petAge').value,
+        breed: document.getElementById('petBreed').value,
+        size: document.getElementById('petSize').value,
+        gender: document.getElementById('petGender').value,
+        type: document.getElementById('petType').value,
+        bio: document.getElementById('petBio').value,
+        vaccinated: document.getElementById('petVaccinated').checked,
+        sterilized: document.getElementById('petSterilized').checked,
+        specialNeeds: document.getElementById('petSpecialNeeds').value,
+        ownerName: document.getElementById('ownerName').value,
+        ownerPhone: document.getElementById('ownerPhone').value,
+        ownerEmail: document.getElementById('ownerEmail').value,
+        ownerLocation: document.getElementById('ownerLocation').value
+    };
+    
+    // Crear nuevo perfil de mascota
+    const newPet = createNewPetProfile(formData);
+    
+    // Añadir a la base de datos
+    addPetToDatabase(newPet);
+    
+    // Simular publicación
+    showToast('¡Mascota publicada exitosamente! Los interesados podrán contactarte.', 'success');
+    
+    // Limpiar formulario
+    document.getElementById('publishPetForm').reset();
+    
+    console.log('Mascota publicada:', newPet);
+}
+
+/**
+ * Crea un nuevo perfil de mascota basado en los datos del formulario
+ */
+function createNewPetProfile(formData) {
+    // Generar ID único
+    const newId = Math.max(...profilesData.map(p => p.id)) + 1;
+    
+    // Crear perfil con estructura similar a los existentes
+    const newPet = {
+        id: newId,
+        name: formData.name,
+        age: formData.age,
+        bio: formData.bio,
+        image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop", // Imagen por defecto
+        images: [
+            "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop"
+        ],
+        interests: generateInterests(formData),
+        shelter: {
+            id: 999, // ID especial para mascotas publicadas por usuarios
+            name: "Publicado por Usuario",
+            address: formData.ownerLocation,
+            phone: formData.ownerPhone,
+            website: "#",
+            description: `Mascota publicada por ${formData.ownerName}`
+        },
+        details: {
+            breed: formData.breed,
+            size: formData.size,
+            gender: formData.gender,
+            vaccinated: formData.vaccinated,
+            sterilized: formData.sterilized,
+            specialNeeds: formData.specialNeeds || "Ninguna",
+            personality: generatePersonality(formData)
+        }
+    };
+    
+    return newPet;
+}
+
+/**
+ * Genera intereses basados en los datos del formulario
+ */
+function generateInterests(formData) {
+    const interests = [];
+    
+    if (formData.vaccinated) interests.push("Vacunado");
+    if (formData.sterilized) interests.push("Esterilizado");
+    if (formData.size === 'pequeño') interests.push("Pequeño");
+    if (formData.size === 'grande') interests.push("Grande");
+    if (formData.specialNeeds) interests.push("Necesidades especiales");
+    
+    return interests;
+}
+
+/**
+ * Genera personalidad basada en los datos del formulario
+ */
+function generatePersonality(formData) {
+    let personality = [];
+    
+    if (formData.size === 'pequeño') personality.push("tranquilo");
+    if (formData.size === 'grande') personality.push("activo");
+    if (formData.vaccinated && formData.sterilized) personality.push("saludable");
+    if (formData.specialNeeds) personality.push("especial");
+    
+    return personality.join(", ") || "cariñoso, amigable";
+}
+
+/**
+ * Añade una nueva mascota a la base de datos
+ */
+function addPetToDatabase(newPet) {
+    // Añadir a la base de datos local
+    profilesData.push(newPet);
+    
+    // Guardar en localStorage para persistencia
+    localStorage.setItem('publishedPets', JSON.stringify(profilesData));
+    
+    // Actualizar la base de datos global
+    if (window.PetMatchData) {
+        window.PetMatchData.profiles = profilesData;
+    }
+    
+    console.log('Mascota añadida a la base de datos:', newPet);
+}
+
+/**
+ * Muestra una foto en modal
+ */
+function showPhotoModal(imageUrl) {
+    // Crear modal dinámico para mostrar foto
+    const modalHtml = `
+        <div class="modal fade" id="photoModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Foto de la Mascota</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="${imageUrl}" class="img-fluid rounded" alt="Foto de la mascota" style="max-height: 500px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal existente si existe
+    const existingModal = document.getElementById('photoModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Agregar nuevo modal al body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('photoModal'));
+    modal.show();
+    
+    // Limpiar modal cuando se cierre
+    document.getElementById('photoModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+// Asignar funciones globales
+window.applyFilters = applyFilters;
+window.clearFilters = clearFilters;
+window.showCompatibilityResults = showCompatibilityResults;
+window.showCompatibilityTestModal = showCompatibilityTestModal;
+window.applyTestResults = applyTestResults;
+window.likePet = likePet;
+window.showPetDetails = showPetDetails;
+window.handlePhotoUpload = handlePhotoUpload;
+window.removePhoto = removePhoto;
+window.sponsorPet = sponsorPet;
+window.handlePublishForm = handlePublishForm;
+window.showPhotoModal = showPhotoModal;
+window.startChat = startChat;
+window.submitAdoptionForm = submitAdoptionForm;
+window.showLikedPets = showLikedPets;
+window.sponsorIndividualPet = sponsorIndividualPet;
+
+/**
+ * Inicia un chat con una mascota
+ */
+function startChat(profileId) {
+    const profile = profilesData.find(p => p.id === profileId);
+    if (!profile) return;
+    
+    console.log('Iniciando chat con:', profile.name, 'ID:', profileId);
+    
+    // Guardar el perfil actual para el chat
+    currentChat = profile;
+    
+    // Cerrar todos los modales abiertos
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach(modal => {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) bsModal.hide();
+    });
+    
+    // Mostrar sección de mensajería con el perfil correcto
+    showMessagesSection(profile);
+    
+    showToast(`Iniciando chat con ${profile.name}`, 'success');
+}
+
+/**
+ * Envía el formulario de adopción
+ */
+function submitAdoptionForm(profileId) {
+    const profile = profilesData.find(p => p.id === profileId);
+    if (!profile) return;
+    
+    // Recopilar datos del formulario
+    const formData = {
+        petId: profileId,
+        petName: profile.name,
+        adopterName: document.getElementById('adopterName').value,
+        adopterEmail: document.getElementById('adopterEmail').value,
+        adopterPhone: document.getElementById('adopterPhone').value,
+        adopterAddress: document.getElementById('adopterAddress').value,
+        adoptionReason: document.getElementById('adoptionReason').value,
+        petExperience: document.getElementById('petExperience').value,
+        starterPack: document.querySelector('input[name="starterPack"]:checked').value
+    };
+    
+    // Validar campos requeridos
+    if (!formData.adopterName || !formData.adopterEmail || !formData.adopterPhone || !formData.adopterAddress || !formData.adoptionReason) {
+        showToast('Por favor completa todos los campos requeridos', 'error');
+        return;
+    }
+    
+    // Simular envío del formulario
+    console.log('Formulario de adopción enviado:', formData);
+    
+    // Cerrar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('adoptionFormModal'));
+    if (modal) modal.hide();
+    
+    showToast(`¡Solicitud de adopción enviada para ${profile.name}! Te contactaremos pronto.`, 'success');
+}
+
+/**
+ * Muestra la página de mascotas favoritas
+ */
+
+/**
+ * Carga las mascotas favoritas en la página dedicada
+ */
+function loadFavorites() {
+    const favoritesGrid = document.getElementById('favoritesGrid');
+    if (!favoritesGrid) return;
+    
+    // Obtener mascotas que han recibido me gusta
+    const likedPets = profilesData.filter(pet => likes.some(like => like.id === pet.id));
+    
+    if (likedPets.length === 0) {
+        favoritesGrid.innerHTML = `
+            <div class="no-favorites">
+                <div class="no-favorites-content">
+                    <i class="fas fa-heart"></i>
+                    <h2>No tienes mascotas favoritas aún</h2>
+                    <p>¡Explora las mascotas disponibles y dales me gusta!</p>
+                    <button class="btn btn-primary btn-lg" onclick="showSwipeSection()">
+                        <i class="fas fa-fire"></i> Empezar a Swipear
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    favoritesGrid.innerHTML = '';
+    
+    likedPets.forEach(pet => {
+        const petCard = document.createElement('div');
+        petCard.className = 'favorite-pet-card';
+        petCard.innerHTML = `
+            <div class="favorite-pet-header">
+                <div class="favorite-pet-image" style="background-image: url('${pet.image}')"></div>
+                <div class="favorite-pet-intro">
+                    <h2>¡Hola! Soy ${pet.name}</h2>
+                    <p class="favorite-pet-age">Tengo ${pet.age}</p>
+                    <p class="favorite-pet-breed">Soy un ${pet.details.breed}</p>
+                    <div class="favorite-pet-personality">
+                        <span class="personality-tag">${pet.details.personality}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="favorite-pet-story">
+                <h3><i class="fas fa-heart"></i> Mi Historia</h3>
+                <p class="favorite-pet-bio">${pet.bio}</p>
+            </div>
+            
+            <div class="favorite-pet-shelter-photos">
+                <h3><i class="fas fa-camera"></i> Fotos mías en el refugio</h3>
+                <div class="shelter-photos-grid">
+                    ${pet.shelterPhotos ? pet.shelterPhotos.map(photo => `
+                        <div class="shelter-photo" style="background-image: url('${photo}')" onclick="showPhotoModal('${photo}')"></div>
+                    `).join('') : ''}
+                </div>
+            </div>
+            
+            <div class="favorite-pet-social-videos">
+                <h3><i class="fas fa-video"></i> Videos de mí en redes sociales</h3>
+                <div class="videos-grid">
+                    ${pet.socialVideos ? pet.socialVideos.map(video => `
+                        <div class="video-card">
+                            <h4>${video.title}</h4>
+                            <p>${video.description}</p>
+                            <div class="video-container">
+                                <iframe src="${video.url}" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    `).join('') : ''}
+                </div>
+            </div>
+            
+            <div class="favorite-pet-shelter-info">
+                <h3><i class="fas fa-home"></i> Mi Refugio</h3>
+                <div class="shelter-card">
+                    <h4>${pet.shelter.name}</h4>
+                    <p>${pet.shelter.description}</p>
+                    <div class="shelter-contact">
+                        <p><i class="fas fa-map-marker-alt"></i> ${pet.shelter.address}</p>
+                        <p><i class="fas fa-phone"></i> ${pet.shelter.phone}</p>
+                        <div class="shelter-social">
+                            <a href="#" target="_blank"><i class="fab fa-instagram"></i> ${pet.shelter.socialMedia.instagram}</a>
+                            <a href="#" target="_blank"><i class="fab fa-facebook"></i> ${pet.shelter.socialMedia.facebook}</a>
+                            <a href="#" target="_blank"><i class="fab fa-tiktok"></i> ${pet.shelter.socialMedia.tiktok}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="favorite-pet-actions">
+                <button class="btn btn-success btn-lg" onclick="sponsorIndividualPet(${pet.id})">
+                    <i class="fas fa-heart"></i> Patrocinarme
+                </button>
+                <button class="btn btn-primary btn-lg" onclick="startChat(${pet.id})">
+                    <i class="fas fa-comments"></i> Chatear conmigo
+                </button>
+                <button class="btn btn-outline-primary btn-lg" onclick="showAdoptionForm(${pet.id})">
+                    <i class="fas fa-home"></i> Adoptarme
+                </button>
+            </div>
+        `;
+        favoritesGrid.appendChild(petCard);
+    });
+}
+
+/**
+ * Patrocina una mascota individual
+ */
+function sponsorIndividualPet(profileId) {
+    const profile = profilesData.find(p => p.id === profileId);
+    if (!profile) return;
+    
+    // Crear modal de patrocinio individual
+    const modalHtml = `
+        <div class="modal fade" id="individualSponsorModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-heart"></i> Patrocinar a ${profile.name}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="sponsor-pet-info">
+                            <div class="sponsor-pet-image" style="background-image: url('${profile.image}')"></div>
+                            <div class="sponsor-pet-details">
+                                <h4>${profile.name}</h4>
+                                <p>${profile.details.breed} - ${profile.age}</p>
+                                <p class="sponsor-pet-description">${profile.bio}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="sponsor-options">
+                            <h5>Selecciona el tipo de patrocinio:</h5>
+                            <div class="sponsor-amounts">
+                                <button class="btn btn-outline-primary sponsor-amount-btn" onclick="selectSponsorAmount(25, ${profileId})">
+                                    $25/mes
+                                </button>
+                                <button class="btn btn-outline-primary sponsor-amount-btn" onclick="selectSponsorAmount(50, ${profileId})">
+                                    $50/mes
+                                </button>
+                                <button class="btn btn-outline-primary sponsor-amount-btn" onclick="selectSponsorAmount(100, ${profileId})">
+                                    $100/mes
+                                </button>
+                            </div>
+                            
+                            <div class="sponsor-form mt-4">
+                                <div class="form-group">
+                                    <label for="sponsorName">Tu nombre</label>
+                                    <input type="text" class="form-control" id="sponsorName" placeholder="Tu nombre completo">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sponsorEmail">Tu email</label>
+                                    <input type="email" class="form-control" id="sponsorEmail" placeholder="tu@email.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sponsorMessage">Mensaje para ${profile.name} (opcional)</label>
+                                    <textarea class="form-control" id="sponsorMessage" rows="3" placeholder="Escribe un mensaje de apoyo..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-success" onclick="confirmIndividualSponsorship(${profileId})">
+                            <i class="fas fa-heart"></i> Confirmar Patrocinio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal anterior si existe
+    const existingModal = document.getElementById('individualSponsorModal');
+    if (existingModal) existingModal.remove();
+    
+    // Añadir nuevo modal al DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('individualSponsorModal'));
+    modal.show();
+}
+
+/**
+ * Selecciona el monto de patrocinio
+ */
+function selectSponsorAmount(amount, profileId) {
+    // Remover selección anterior
+    document.querySelectorAll('.sponsor-amount-btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+    });
+    
+    // Seleccionar nuevo monto
+    event.target.classList.remove('btn-outline-primary');
+    event.target.classList.add('btn-primary');
+    
+    // Guardar monto seleccionado
+    event.target.dataset.selectedAmount = amount;
+}
+
+/**
+ * Confirma el patrocinio individual
+ */
+function confirmIndividualSponsorship(profileId) {
+    const profile = profilesData.find(p => p.id === profileId);
+    if (!profile) return;
+    
+    const sponsorName = document.getElementById('sponsorName').value;
+    const sponsorEmail = document.getElementById('sponsorEmail').value;
+    const sponsorMessage = document.getElementById('sponsorMessage').value;
+    const selectedAmount = document.querySelector('.sponsor-amount-btn.btn-primary')?.dataset.selectedAmount;
+    
+    if (!sponsorName || !sponsorEmail || !selectedAmount) {
+        showToast('Por favor completa todos los campos requeridos', 'error');
+        return;
+    }
+    
+    // Simular patrocinio
+    console.log('Patrocinio individual confirmado:', {
+        petId: profileId,
+        petName: profile.name,
+        sponsorName,
+        sponsorEmail,
+        sponsorMessage,
+        amount: selectedAmount
+    });
+    
+    // Cerrar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('individualSponsorModal'));
+    if (modal) modal.hide();
+    
+    showToast(`¡Patrocinio confirmado para ${profile.name}! Gracias por tu generosidad.`, 'success');
 }
 
 // ===========================================

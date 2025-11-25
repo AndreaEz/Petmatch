@@ -92,6 +92,31 @@
             </div>
         </div>
 
+        <!-- Swipe Section -->
+        <div class="swipe-section d-none" id="swipeContainer">
+            <div class="swipe-header">
+                <h2><i class="fas fa-fire text-danger"></i> Encuentra tu Match Perfecto</h2>
+                <button class="btn btn-outline-primary" id="backToWelcomeFromSwipeBtn">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+            
+            <div class="swipe-container">
+                <div class="card-stack" id="cardStack">
+                    <!-- Cards will be dynamically generated here -->
+                </div>
+                
+                <div class="swipe-actions">
+                    <button class="swipe-btn pass-btn" id="passBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="swipe-btn like-btn" id="likeBtn">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Adoption Section (Netflix Style) -->
         <div class="adoption-section d-none" id="adoptionSection">
             <div class="adoption-header">
@@ -335,7 +360,7 @@
                     <button class="btn btn-outline-danger" id="clearLikesBtn">
                         <i class="fas fa-trash"></i> Eliminar Todos
                     </button>
-                    <button class="btn btn-outline-primary" id="backToWelcomeFromLikesBtn">
+                    <button class="btn btn-outline-primary" id="backToSwipeFromLikesBtn">
                         <i class="fas fa-arrow-left"></i> Volver
                     </button>
                 </div>
@@ -349,7 +374,7 @@
         <div class="matches-section d-none" id="matchesSection">
             <div class="matches-header">
                 <h2><i class="fas fa-comments text-primary"></i> Nuevos Matches</h2>
-                <button class="btn btn-outline-primary" id="backToWelcomeFromMatchesBtn">
+                <button class="btn btn-outline-primary" id="backToSwipeBtn">
                     <i class="fas fa-arrow-left"></i> Volver
                 </button>
             </div>
@@ -681,7 +706,7 @@
                         <h2 class="match-title">¡Es un Match!</h2>
                         <p class="match-subtitle">Tú y <span id="matchUserName"></span> se gustaron mutuamente</p>
                         <div class="match-actions">
-                            <button class="btn btn-outline-light me-2" data-bs-dismiss="modal">Cerrar</button>
+                            <button class="btn btn-outline-light me-2" data-bs-dismiss="modal">Seguir Swipeando</button>
                             <button class="btn btn-primary" id="sendMessageNowBtn">Enviar Mensaje</button>
                         </div>
                     </div>
@@ -951,54 +976,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Chat con IA Section -->
-    <div class="ai-chat-section d-none" id="aiChatSection">
-        <div class="ai-chat-header">
-            <div class="ai-chat-header-content">
-                <div class="ai-chat-avatar">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <div class="ai-chat-info">
-                    <h3>Asistente de Cuidado de Mascotas</h3>
-                    <p class="ai-status">En línea</p>
-                </div>
-            </div>
-            <button class="btn btn-outline-light btn-sm" id="closeAiChatBtn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="ai-chat-container" id="aiChatContainer">
-            <div class="ai-message welcome-message">
-                <div class="ai-avatar-small">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <div class="ai-message-content">
-                    <p>¡Hola! Soy tu asistente de cuidado de mascotas. Puedo ayudarte con:</p>
-                    <ul>
-                        <li>Consejos de alimentación</li>
-                        <li>Cuidados de salud</li>
-                        <li>Entrenamiento y comportamiento</li>
-                        <li>Preparación para adopción</li>
-                        <li>Y mucho más...</li>
-                    </ul>
-                    <p>¿En qué puedo ayudarte hoy?</p>
-                </div>
-            </div>
-        </div>
-        <div class="ai-chat-input-container">
-            <input type="text" class="form-control" id="aiChatInput" placeholder="Escribe tu pregunta sobre cuidado de mascotas...">
-            <button class="btn btn-primary" id="sendAiMessageBtn">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- Botón flotante de chat con IA -->
-    <button class="ai-chat-float-btn" id="aiChatFloatBtn" title="Chat con Asistente de Mascotas">
-        <i class="fas fa-robot"></i>
-        <span class="ai-chat-badge">IA</span>
-    </button>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

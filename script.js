@@ -38,51 +38,36 @@ let currentChat = null;
 let messages = {};
 
 // ===========================================
-// CONFIGURACIÓN DE API DE IA
-// ===========================================
-const AI_CONFIG = {
-    enabled: true, // ✅ Activado - Usando Google Gemini
-    apiType: 'gemini', // Google Gemini API
-    apiUrl: 'http://localhost:3000/api/chat', // URL del backend local
-    useBackend: true // Siempre true para seguridad
-};
-
-// ===========================================
 // FUNCIONES DE NAVEGACIÓN (DISPONIBLES INMEDIATAMENTE)
 // ===========================================
 
 // Definir las funciones inmediatamente y asignarlas al objeto window
 
 /**
- * Muestra el chat con IA
+ * Muestra la sección de swipe de tarjetas
  */
-function showAiChat() {
-    console.log('Abriendo chat con IA...');
+function showSwipeSection() {
+    console.log('Navegando a sección de swipe...');
     try {
-        const aiChatSection = document.getElementById('aiChatSection');
-        if (aiChatSection) {
-            aiChatSection.classList.remove('d-none');
-            // Scroll al final del chat
-            setTimeout(() => {
-                const container = document.getElementById('aiChatContainer');
-                if (container) {
-                    container.scrollTop = container.scrollHeight;
-                }
-            }, 100);
-            console.log('Chat con IA mostrado');
+        // Ocultar todas las secciones
+        const sections = ['welcomeScreen', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection'];
+        sections.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.classList.add('d-none');
+            }
+        });
+        
+        // Mostrar sección de swipe
+        const swipeContainer = document.getElementById('swipeContainer');
+        if (swipeContainer) {
+            swipeContainer.classList.remove('d-none');
+            console.log('Sección de swipe mostrada');
+        } else {
+            console.error('Elemento swipeContainer no encontrado');
         }
     } catch (error) {
-        console.error('Error en showAiChat:', error);
-    }
-}
-
-/**
- * Oculta el chat con IA
- */
-function hideAiChat() {
-    const aiChatSection = document.getElementById('aiChatSection');
-    if (aiChatSection) {
-        aiChatSection.classList.add('d-none');
+        console.error('Error en showSwipeSection:', error);
     }
 }
 
@@ -93,7 +78,7 @@ function showPetCareSection() {
     console.log('Navegando a sección de cuidado de mascotas...');
     try {
         // Ocultar todas las secciones
-        const sections = ['welcomeScreen', 'likesSection', 'matchesSection', 'messagesSection', 'donationSection', 'adoptionSection', 'publishSection', 'favoritesPage'];
+        const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'donationSection'];
         sections.forEach(sectionId => {
             const element = document.getElementById(sectionId);
             if (element) {
@@ -121,7 +106,7 @@ function showDonationSection() {
     console.log('Navegando a sección de donaciones...');
     try {
         // Ocultar todas las secciones
-        const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'adoptionSection', 'publishSection', 'favoritesPage'];
+        const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection'];
         sections.forEach(sectionId => {
             const element = document.getElementById(sectionId);
             if (element) {
@@ -149,7 +134,7 @@ function showWelcomeScreen() {
     console.log('Navegando a pantalla de bienvenida...');
     try {
         // Ocultar todas las secciones
-        const sections = ['likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection', 'adoptionSection', 'publishSection'];
+        const sections = ['swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection', 'adoptionSection', 'publishSection'];
         sections.forEach(sectionId => {
             const element = document.getElementById(sectionId);
             if (element) {
@@ -177,7 +162,7 @@ function showAdoptionSection() {
     console.log('Navegando a sección de adopción...');
     try {
         // Ocultar todas las secciones
-        const sections = ['welcomeScreen', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection', 'publishSection'];
+        const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'matchesSection', 'messagesSection', 'petCareSection', 'donationSection', 'publishSection'];
         sections.forEach(sectionId => {
             const element = document.getElementById(sectionId);
             if (element) {
@@ -238,15 +223,31 @@ function showPublishSection() {
 }
 
 // Asignar las funciones al objeto window inmediatamente después de definirlas
+window.showSwipeSection = showSwipeSection;
 window.showPetCareSection = showPetCareSection;
 window.showDonationSection = showDonationSection;
 window.showWelcomeScreen = showWelcomeScreen;
 window.showAdoptionSection = showAdoptionSection;
 window.showPublishSection = showPublishSection;
-window.showAiChat = showAiChat;
-window.hideAiChat = hideAiChat;
 
 console.log('Funciones de navegación cargadas y disponibles globalmente');
+console.log('showSwipeSection disponible:', typeof window.showSwipeSection);
+console.log('showPetCareSection disponible:', typeof window.showPetCareSection);
+console.log('showDonationSection disponible:', typeof window.showDonationSection);
+
+// Verificación adicional después de un breve delay
+setTimeout(function() {
+    console.log('Verificación final de funciones:');
+    console.log('showSwipeSection:', typeof window.showSwipeSection);
+    console.log('showPetCareSection:', typeof window.showPetCareSection);
+    console.log('showDonationSection:', typeof window.showDonationSection);
+    
+    if (typeof window.showSwipeSection === 'function') {
+        console.log('✅ Todas las funciones están correctamente cargadas');
+    } else {
+        console.error('❌ Error: Las funciones no se cargaron correctamente');
+    }
+}, 100);
 
 // ===========================================
 // INICIALIZACIÓN DE LA APLICACIÓN
@@ -285,6 +286,8 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeApp();
         console.log('Configurando event listeners...');
         setupEventListeners();
+        console.log('Creando tarjetas de perfiles...');
+        createProfileCards();
         console.log('Actualizando contadores...');
         updateCounters();
         console.log('Aplicación inicializada correctamente');
@@ -336,30 +339,28 @@ function initializeApp() {
 function setupEventListeners() {
     console.log('Configurando event listeners...');
     
-    // Chat con IA - Botón flotante
-    const aiChatFloatBtn = document.getElementById('aiChatFloatBtn');
-    if (aiChatFloatBtn) {
-        aiChatFloatBtn.addEventListener('click', showAiChat);
-    }
+    // Botones de acción principal (pass y like)
+    const passBtn = document.getElementById('passBtn');
+    const likeBtn = document.getElementById('likeBtn');
     
-    // Chat con IA - Botón cerrar
-    const closeAiChatBtn = document.getElementById('closeAiChatBtn');
-    if (closeAiChatBtn) {
-        closeAiChatBtn.addEventListener('click', hideAiChat);
-    }
-    
-    // Chat con IA - Enviar mensaje
-    const sendAiMessageBtn = document.getElementById('sendAiMessageBtn');
-    const aiChatInput = document.getElementById('aiChatInput');
-    if (sendAiMessageBtn) {
-        sendAiMessageBtn.addEventListener('click', sendAiMessage);
-    }
-    if (aiChatInput) {
-        aiChatInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendAiMessage();
-            }
+    if (passBtn) {
+        passBtn.addEventListener('click', () => {
+            console.log('Botón PASS clickeado');
+            handleAction('pass');
         });
+        console.log('Event listener de PASS configurado');
+    } else {
+        console.error('Botón passBtn no encontrado');
+    }
+    
+    if (likeBtn) {
+        likeBtn.addEventListener('click', () => {
+            console.log('Botón LIKE clickeado');
+            handleAction('like');
+        });
+        console.log('Event listener de LIKE configurado');
+    } else {
+        console.error('Botón likeBtn no encontrado');
     }
     
     // Hacer las funciones adicionales disponibles globalmente para onclick
@@ -376,6 +377,7 @@ function setupEventListeners() {
     window.showDetailedProfile = showDetailedProfile;
     window.showPetInfoModal = showPetInfoModal;
     window.donateToShelter = donateToShelter;
+    window.resetProfiles = resetProfiles;
     
     console.log('Funciones adicionales asignadas globalmente');
     console.log('showAdoptionForm disponible:', typeof window.showAdoptionForm);
@@ -383,8 +385,20 @@ function setupEventListeners() {
     console.log('Funciones globales configuradas');
     
     // Botones del menú principal (welcome screen)
+    const swipeBtn = document.getElementById('swipeBtn');
     const careBtn = document.getElementById('careBtn');
     const donationBtn = document.getElementById('donationBtn');
+    
+    if (swipeBtn) {
+        swipeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón Swipe clickeado');
+            showSwipeSection();
+        });
+        console.log('Event listener de Swipe configurado');
+    } else {
+        console.error('Botón swipeBtn no encontrado');
+    }
     
     if (careBtn) {
         careBtn.addEventListener('click', function(e) {
@@ -409,80 +423,38 @@ function setupEventListeners() {
     }
     
     // Botones de navegación entre secciones
-    const homeBtn = document.getElementById('homeBtn');
-    if (homeBtn) {
-        homeBtn.addEventListener('click', showWelcomeScreen);
-    }
-    
+    document.getElementById('homeBtn').addEventListener('click', showWelcomeScreen);
     // Si el corazón es un enlace a favorites.html, no sobreescribir navegación SPA
     const likesBtn = document.getElementById('likesBtn');
     if (likesBtn && (!likesBtn.getAttribute('href') || likesBtn.getAttribute('href') === '#')) {
         likesBtn.addEventListener('click', showLikesSection);
     }
-    
-    const matchesBtn = document.getElementById('matchesBtn');
-    if (matchesBtn) {
-        matchesBtn.addEventListener('click', showMatchesSection);
-    }
-    
-    const profileBtn = document.getElementById('profileBtn');
-    if (profileBtn) {
-        profileBtn.addEventListener('click', showProfile);
-    }
-    
-    // Botones de volver - verificar existencia antes de agregar listeners
-    const backToWelcomeFromMatchesBtn = document.getElementById('backToWelcomeFromMatchesBtn');
-    if (backToWelcomeFromMatchesBtn) {
-        backToWelcomeFromMatchesBtn.addEventListener('click', showWelcomeScreen);
-    }
-    
-    const backToWelcomeFromLikesBtn = document.getElementById('backToWelcomeFromLikesBtn');
-    if (backToWelcomeFromLikesBtn) {
-        backToWelcomeFromLikesBtn.addEventListener('click', showWelcomeScreen);
-    }
-    
-    const backToMatchesBtn = document.getElementById('backToMatchesBtn');
-    if (backToMatchesBtn) {
-        backToMatchesBtn.addEventListener('click', showMatchesSection);
-    }
-    
-    const backToWelcomeBtn = document.getElementById('backToWelcomeBtn');
-    if (backToWelcomeBtn) {
-        backToWelcomeBtn.addEventListener('click', showWelcomeScreen);
-    }
-    
-    const backToWelcomeFromDonationBtn = document.getElementById('backToWelcomeFromDonationBtn');
-    if (backToWelcomeFromDonationBtn) {
-        backToWelcomeFromDonationBtn.addEventListener('click', showWelcomeScreen);
-    }
-    
-    const backToWelcomeFromSwipeBtn = document.getElementById('backToWelcomeFromSwipeBtn');
-    if (backToWelcomeFromSwipeBtn) {
-        backToWelcomeFromSwipeBtn.addEventListener('click', showWelcomeScreen);
-    }
+    document.getElementById('matchesBtn').addEventListener('click', showMatchesSection);
+    document.getElementById('profileBtn').addEventListener('click', showProfile);
+    document.getElementById('backToSwipeBtn').addEventListener('click', showSwipeSection);
+    document.getElementById('backToSwipeFromLikesBtn').addEventListener('click', showSwipeSection);
+    document.getElementById('backToMatchesBtn').addEventListener('click', showMatchesSection);
+    document.getElementById('backToWelcomeBtn').addEventListener('click', showWelcomeScreen);
+    document.getElementById('backToWelcomeFromDonationBtn').addEventListener('click', showWelcomeScreen);
+    document.getElementById('backToWelcomeFromSwipeBtn').addEventListener('click', showWelcomeScreen);
+    document.getElementById('backToWelcomeFromFavoritesBtn').addEventListener('click', showWelcomeScreen);
     
     // Event listeners para botones del modal de información
-    const likeFromInfoBtn = document.getElementById('likeFromInfoBtn');
-    if (likeFromInfoBtn) {
-        likeFromInfoBtn.addEventListener('click', function() {
-            if (currentAdoptionPet) {
-                likePet(currentAdoptionPet.id);
-                const modal = bootstrap.Modal.getInstance(document.getElementById('petInfoModal'));
-                if (modal) modal.hide();
-            }
-        });
-    }
+    document.getElementById('likeFromInfoBtn').addEventListener('click', function() {
+        if (currentAdoptionPet) {
+            likePet(currentAdoptionPet.id);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('petInfoModal'));
+            if (modal) modal.hide();
+        }
+    });
     
-    const chatFromInfoBtn = document.getElementById('chatFromInfoBtn');
-    if (chatFromInfoBtn) {
-        chatFromInfoBtn.addEventListener('click', function() {
-            if (currentAdoptionPet) {
-                startChat(currentAdoptionPet.id);
-                const modal = bootstrap.Modal.getInstance(document.getElementById('petInfoModal'));
-                if (modal) modal.hide();
-            }
-        });
-    }
+    document.getElementById('chatFromInfoBtn').addEventListener('click', function() {
+        if (currentAdoptionPet) {
+            startChat(currentAdoptionPet.id);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('petInfoModal'));
+            if (modal) modal.hide();
+        }
+    });
     
     // Botones de adopción y modales de perfil
     const adoptFromProfileBtn = document.getElementById('adoptFromProfileBtn');
@@ -517,40 +489,23 @@ function setupEventListeners() {
     }
     
     // Gestión de likes (eliminar individual y todos)
-    const clearLikesBtn = document.getElementById('clearLikesBtn');
-    if (clearLikesBtn) {
-        clearLikesBtn.addEventListener('click', showDeleteConfirmation);
-    }
-    
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener('click', clearAllLikes);
-    }
+    document.getElementById('clearLikesBtn').addEventListener('click', showDeleteConfirmation);
+    document.getElementById('confirmDeleteBtn').addEventListener('click', clearAllLikes);
     
     // Funcionalidad de mensajes
-    const sendMessageBtn = document.getElementById('sendMessageBtn');
-    if (sendMessageBtn) {
-        sendMessageBtn.addEventListener('click', sendMessage);
-    }
-    
-    const messageInput = document.getElementById('messageInput');
-    if (messageInput) {
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    }
+    document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
     
     // Modal de match - botón para enviar mensaje inmediatamente
-    const sendMessageNowBtn = document.getElementById('sendMessageNowBtn');
-    if (sendMessageNowBtn) {
-        sendMessageNowBtn.addEventListener('click', function() {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('matchModal'));
-            if (modal) modal.hide();
-            showMessagesSection(currentChat);
-        });
-    }
+    document.getElementById('sendMessageNowBtn').addEventListener('click', function() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('matchModal'));
+        modal.hide();
+        showMessagesSection(currentChat);
+    });
     
     // Formulario de publicación
     const publishForm = document.getElementById('publishPetForm');
@@ -577,173 +532,228 @@ function setupEventListeners() {
         });
     }
     
-    // Botones de navegación adicionales (ya verificados arriba, pero los mantenemos aquí por claridad)
+    // Botones de navegación adicionales
     const backToWelcomeFromAdoptionBtn = document.getElementById('backToWelcomeFromAdoptionBtn');
+    const backToWelcomeFromPublishBtn = document.getElementById('backToWelcomeFromPublishBtn');
+    
     if (backToWelcomeFromAdoptionBtn) {
         backToWelcomeFromAdoptionBtn.addEventListener('click', showWelcomeScreen);
     }
     
-    const backToWelcomeFromPublishBtn = document.getElementById('backToWelcomeFromPublishBtn');
     if (backToWelcomeFromPublishBtn) {
         backToWelcomeFromPublishBtn.addEventListener('click', showWelcomeScreen);
     }
 }
 
 /**
- * Envía un mensaje al chat con IA
+ * Crea las tarjetas de perfiles para mostrar en el stack
+ * Genera hasta 3 tarjetas apiladas con efecto de profundidad
  */
-function sendAiMessage() {
-    const aiChatInput = document.getElementById('aiChatInput');
-    const text = aiChatInput.value.trim();
+function createProfileCards() {
+    const cardStack = document.getElementById('cardStack');
+    cardStack.innerHTML = '';
     
-    if (!text) return;
-    
-    // Agregar mensaje del usuario al chat
-    const aiChatContainer = document.getElementById('aiChatContainer');
-    const userMessage = document.createElement('div');
-    userMessage.className = 'user-message';
-    userMessage.innerHTML = `
-        <div class="user-message-content">
-            <p>${text}</p>
-        </div>
-    `;
-    aiChatContainer.appendChild(userMessage);
-    
-    // Limpiar input
-    aiChatInput.value = '';
-    
-    // Scroll al final
-    aiChatContainer.scrollTop = aiChatContainer.scrollHeight;
-    
-    // Mostrar indicador de carga
-    const loadingMessage = document.createElement('div');
-    loadingMessage.className = 'ai-message loading';
-    loadingMessage.id = 'aiLoadingMessage';
-    loadingMessage.innerHTML = `
-        <div class="ai-avatar-small">
-            <i class="fas fa-robot"></i>
-        </div>
-        <div class="ai-message-content">
-            <p><i class="fas fa-spinner fa-spin"></i> Pensando...</p>
-        </div>
-    `;
-    aiChatContainer.appendChild(loadingMessage);
-    aiChatContainer.scrollTop = aiChatContainer.scrollHeight;
-    
-    // Llamar a la API de IA
-    if (AI_CONFIG.enabled && AI_CONFIG.apiUrl) {
-        callAiApi(text, aiChatContainer, loadingMessage);
-    } else {
-        // Usar respuestas predefinidas si la API no está configurada
-        setTimeout(() => {
-            loadingMessage.remove();
-            const aiResponse = generateAiResponse(text);
-            displayAiResponse(aiResponse, aiChatContainer);
-        }, 1000);
+    // Crear tarjetas para los próximos 3 perfiles (máximo)
+    for (let i = 0; i < Math.min(appConfig.maxProfilesPerLoad, profilesData.length - currentCardIndex); i++) {
+        const profile = profilesData[currentCardIndex + i];
+        const card = createProfileCard(profile, i);
+        cardStack.appendChild(card);
     }
+    
+    // Configurar funcionalidad de swipe para la tarjeta superior
+    // Esperar un poco para asegurar que las tarjetas estén completamente renderizadas
+    setTimeout(() => {
+        setupSwipeFunctionality();
+    }, 100);
 }
 
 /**
- * Llama a la API de IA real
+ * Crea una tarjeta individual de perfil con toda su información
+ * @param {Object} profile - Datos del perfil de la mascota
+ * @param {number} index - Índice de la tarjeta en el stack (0 = superior)
+ * @returns {HTMLElement} - Elemento HTML de la tarjeta creada
  */
-async function callAiApi(userQuestion, container, loadingElement) {
-    try {
-        const response = await fetch(AI_CONFIG.apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message: userQuestion,
-                apiType: AI_CONFIG.apiType
-            })
+function createProfileCard(profile, index) {
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    
+    // Configurar z-index y transformaciones para efecto de apilamiento
+    card.style.zIndex = 3 - index;
+    card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 10}px)`;
+    card.dataset.profileId = profile.id;
+    
+    // Desactivar animaciones CSS automáticas
+    card.style.animation = 'none';
+    card.style.opacity = '1';
+    card.style.transition = 'none';
+    
+    // Aplicar animación manual solo si es necesario
+    if (index === 0) {
+        // Solo la primera tarjeta tiene una animación suave de entrada
+        setTimeout(() => {
+            card.style.transition = 'all 0.3s ease-out';
+            card.style.opacity = '1';
+        }, 50);
+    }
+    
+    // Generar HTML de la tarjeta con imagen, información y overlays
+    card.innerHTML = `
+        <div class="profile-image" style="background-image: url('${profile.image}')"></div>
+        <div class="profile-info">
+            <div class="profile-name">${profile.name}</div>
+            <div class="profile-age">${profile.age}</div>
+            <div class="profile-bio">${profile.bio}</div>
+        </div>
+        <div class="like-overlay">LIKE</div>
+        <div class="pass-overlay">PASS</div>
+    `;
+    
+    return card;
+}
+
+/**
+ * Configura la funcionalidad de swipe para la tarjeta superior
+ * Utiliza Hammer.js para detectar gestos de deslizamiento
+ */
+function setupSwipeFunctionality() {
+    const topCard = document.querySelector('.profile-card');
+    if (!topCard) {
+        console.log('No hay tarjeta superior para configurar swipe');
+        return;
+    }
+    
+    // Asegurar que la tarjeta esté en posición inicial sin animaciones
+    topCard.style.transform = '';
+    topCard.style.opacity = '1';
+    topCard.style.transition = 'none';
+    topCard.style.animation = 'none';
+    
+    // Esperar un poco antes de configurar el swipe para evitar conflictos
+    setTimeout(() => {
+        topCard.style.transition = 'all 0.3s ease-out';
+        
+        const hammer = new Hammer(topCard);
+        
+        // Configurar dirección de pan (solo horizontal para evitar movimientos accidentales)
+        hammer.get('pan').set({ direction: Hammer.DIRECTION_HORIZONTAL });
+        
+        console.log('Swipe configurado para la tarjeta superior');
+        
+        // Evento cuando comienza el swipe
+        hammer.on('panstart', function(e) {
+            topCard.classList.add('swiping');
         });
         
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
-        }
+        // Evento durante el movimiento del swipe
+        hammer.on('panmove', function(e) {
+            const deltaX = e.deltaX;
+            const deltaY = e.deltaY;
+            const rotation = deltaX * 0.1;
+            
+            // Aplicar transformación en tiempo real
+            topCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+            
+            // Mostrar overlay según la dirección del swipe
+            const likeOverlay = topCard.querySelector('.like-overlay');
+            const passOverlay = topCard.querySelector('.pass-overlay');
+            
+            if (deltaX > 50) {
+                likeOverlay.classList.add('show');
+                passOverlay.classList.remove('show');
+            } else if (deltaX < -50) {
+                passOverlay.classList.add('show');
+                likeOverlay.classList.remove('show');
+            } else {
+                likeOverlay.classList.remove('show');
+                passOverlay.classList.remove('show');
+            }
+        });
         
-        const data = await response.json();
-        loadingElement.remove();
-        
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        
-        displayAiResponse(data.response || data.message, container);
-    } catch (error) {
-        console.error('Error llamando a la API de IA:', error);
-        loadingElement.remove();
-        
-        // Determinar el tipo de error
-        let errorText = '';
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            errorText = '⚠️ <strong>El servidor backend no está corriendo.</strong><br><br>Por favor:<br>1. Ejecuta <code>INICIAR_SERVIDOR.bat</code> o<br>2. Abre una terminal y ejecuta: <code>node backend-example.js</code><br><br>Luego refresca esta página (F5).';
-        } else {
-            errorText = `⚠️ Error al conectar con la IA: ${error.message}<br><br>Aquí tienes una respuesta útil:`;
-        }
-        
-        // Mostrar error
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'ai-message error';
-        errorMessage.innerHTML = `
-            <div class="ai-avatar-small">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="ai-message-content">
-                <p>${errorText}</p>
-            </div>
-        `;
-        container.appendChild(errorMessage);
-        
-        // Solo mostrar respuesta predefinida si no es error de conexión
-        if (!error.message.includes('Failed to fetch') && !error.message.includes('NetworkError')) {
-            const fallbackResponse = generateAiResponse(userQuestion);
-            displayAiResponse(fallbackResponse, container);
-        }
-        
-        container.scrollTop = container.scrollHeight;
-    }
+        // Evento cuando termina el swipe
+        hammer.on('panend', function(e) {
+            topCard.classList.remove('swiping');
+            
+            const deltaX = e.deltaX;
+            const threshold = appConfig.swipeThreshold;
+            
+            // Si el swipe supera el umbral, procesar la acción
+            if (Math.abs(deltaX) > threshold) {
+                const action = deltaX > 0 ? 'like' : 'pass';
+                handleSwipeAction(action, topCard);
+            } else {
+                // Si no supera el umbral, regresar al centro
+                topCard.style.transform = '';
+                topCard.querySelector('.like-overlay').classList.remove('show');
+                topCard.querySelector('.pass-overlay').classList.remove('show');
+            }
+        });
+    }, 100);
 }
 
-/**
- * Muestra la respuesta de la IA en el chat
- */
-function displayAiResponse(response, container) {
-    const aiMessage = document.createElement('div');
-    aiMessage.className = 'ai-message';
-    aiMessage.innerHTML = `
-        <div class="ai-avatar-small">
-            <i class="fas fa-robot"></i>
-        </div>
-        <div class="ai-message-content">
-            <p>${response.replace(/\n/g, '<br>')}</p>
-        </div>
-    `;
-    container.appendChild(aiMessage);
-    container.scrollTop = container.scrollHeight;
-}
-
-/**
- * Genera una respuesta de la IA basada en la pregunta del usuario (fallback)
- */
-function generateAiResponse(userQuestion) {
-    const question = userQuestion.toLowerCase();
+function handleAction(action) {
+    const topCard = document.querySelector('.profile-card');
+    if (!topCard) return;
     
-    // Respuestas predefinidas basadas en palabras clave
-    if (question.includes('aliment') || question.includes('comida') || question.includes('comer')) {
-        return 'Para una alimentación saludable de tu mascota, te recomiendo:\n\n• Proporciona comida de calidad apropiada para la edad y tamaño de tu mascota\n• Establece horarios regulares de comida (2-3 veces al día para perros adultos)\n• Evita dar comida humana, especialmente chocolate, cebolla, ajo y uvas que son tóxicos\n• Asegúrate de que siempre tenga agua fresca disponible\n• Consulta con tu veterinario sobre la cantidad adecuada según el peso y actividad\n\n¿Tienes alguna pregunta específica sobre la alimentación?';
-    } else if (question.includes('salud') || question.includes('veterinari') || question.includes('vacun')) {
-        return 'El cuidado de la salud de tu mascota es fundamental:\n\n• Mantén al día las vacunas según el calendario recomendado por tu veterinario\n• Realiza chequeos regulares (al menos una vez al año)\n• Observa cambios en comportamiento, apetito o actividad\n• Mantén una buena higiene dental\n• Presta atención a parásitos externos e internos\n• Esterilización es recomendada para prevenir enfermedades y controlar población\n\n¿Necesitas ayuda con algún aspecto específico de la salud?';
-    } else if (question.includes('entren') || question.includes('comport') || question.includes('educ')) {
-        return 'El entrenamiento y educación de tu mascota requiere paciencia y consistencia:\n\n• Usa refuerzo positivo (premios, elogios) en lugar de castigos\n• Sé consistente con las reglas y comandos\n• Las sesiones cortas (10-15 min) son más efectivas que sesiones largas\n• Socializa a tu mascota desde temprana edad\n• Establece rutinas claras para comida, paseos y descanso\n• Considera clases de entrenamiento profesional si es necesario\n\n¿Qué comportamiento específico te gustaría trabajar?';
-    } else if (question.includes('adopt') || question.includes('prepar') || question.includes('nuev')) {
-        return 'Prepararse para adoptar una mascota es emocionante. Aquí tienes una guía:\n\n• Prepara tu hogar: espacio seguro, juguetes, cama, platos de comida y agua\n• Investiga sobre la raza o tipo de mascota que quieres adoptar\n• Considera el tiempo y recursos que puedes dedicar\n• Visita al veterinario poco después de la adopción para chequeo inicial\n• Ten paciencia durante el período de adaptación (puede tomar semanas)\n• Establece rutinas desde el primer día\n\n¿Tienes alguna duda específica sobre el proceso de adopción?';
-    } else if (question.includes('ejercicio') || question.includes('paseo') || question.includes('actividad')) {
-        return 'El ejercicio es esencial para el bienestar de tu mascota:\n\n• Perros: Necesitan paseos diarios (al menos 30 min, 2-3 veces al día)\n• Gatos: Proporciona juguetes interactivos y tiempo de juego diario\n• Adapta la intensidad según la edad y condición física\n• Evita ejercicio intenso después de comer\n• En días calurosos, haz ejercicio temprano o tarde\n• Observa señales de cansancio o sobreesfuerzo\n\n¿Qué tipo de mascota tienes o planeas tener?';
-    } else {
-        return 'Gracias por tu pregunta. Puedo ayudarte con temas relacionados a:\n\n• Alimentación y nutrición\n• Cuidados de salud y veterinaria\n• Entrenamiento y comportamiento\n• Preparación para adopción\n• Ejercicio y actividad física\n• Higiene y cuidado general\n\n¿Sobre cuál de estos temas te gustaría saber más?';
+    // Animate the action
+    animateAction(action, topCard);
+    
+    setTimeout(() => {
+        handleSwipeAction(action, topCard);
+    }, 300);
+}
+
+function animateAction(action, card) {
+    const likeOverlay = card.querySelector('.like-overlay');
+    const passOverlay = card.querySelector('.pass-overlay');
+    
+    // Add pulse animation to the card
+    card.classList.add('pulse-animation');
+    
+    if (action === 'like') {
+        likeOverlay.classList.add('show');
+        card.style.transform = 'translate(100px, 0) rotate(15deg)';
+        card.style.transition = 'all 0.3s ease-out';
+    } else if (action === 'pass') {
+        passOverlay.classList.add('show');
+        card.style.transform = 'translate(-100px, 0) rotate(-15deg)';
+        card.style.transition = 'all 0.3s ease-out';
     }
+    
+    // Remove pulse animation after it completes
+    setTimeout(() => {
+        card.classList.remove('pulse-animation');
+    }, 600);
+}
+
+function handleSwipeAction(action, card) {
+    const profileId = parseInt(card.dataset.profileId);
+    const profile = profilesData.find(p => p.id === profileId);
+    
+    // Remove the card with animation
+    card.style.transition = 'all 0.5s ease-out';
+    card.style.transform = action === 'like'
+        ? 'translate(100vw, 0) rotate(30deg)' 
+        : 'translate(-100vw, 0) rotate(-30deg)';
+    card.style.opacity = '0';
+    
+    setTimeout(() => {
+        card.remove();
+        currentCardIndex++;
+        
+        // Handle like/pass
+        if (action === 'like') {
+            addToLikes(profile, action);
+            checkForMatch(profile);
+        }
+        
+        // Create new cards if needed
+        createProfileCards();
+        
+        // Check if we're out of profiles
+        if (currentCardIndex >= profilesData.length) {
+            showOutOfProfiles();
+        }
+    }, 500);
 }
 
 function addToLikes(profile, type) {
@@ -816,29 +826,15 @@ function showLikesSection() {
 }
 
 function showMatchesSection() {
-    console.log('Navegando a sección de matches...');
-    try {
-        // Ocultar todas las secciones
-        const sections = ['welcomeScreen', 'swipeContainer', 'likesSection', 'messagesSection', 'petCareSection', 'donationSection', 'adoptionSection', 'publishSection', 'favoritesPage'];
-        sections.forEach(sectionId => {
-            const element = document.getElementById(sectionId);
-            if (element) {
-                element.classList.add('d-none');
-            }
-        });
-        
-        // Mostrar sección de matches
-        const matchesSection = document.getElementById('matchesSection');
-        if (matchesSection) {
-            matchesSection.classList.remove('d-none');
-            displayMatches();
-            console.log('Sección de matches mostrada');
-        } else {
-            console.error('Elemento matchesSection no encontrado');
-        }
-    } catch (error) {
-        console.error('Error en showMatchesSection:', error);
-    }
+    document.getElementById('welcomeScreen').classList.add('d-none');
+    document.getElementById('swipeContainer').classList.add('d-none');
+    document.getElementById('likesSection').classList.add('d-none');
+    document.getElementById('matchesSection').classList.remove('d-none');
+    document.getElementById('messagesSection').classList.add('d-none');
+    document.getElementById('petCareSection').classList.add('d-none');
+    document.getElementById('donationSection').classList.add('d-none');
+    
+    displayMatches();
 }
 
 function showMessagesSection(profile) {
@@ -879,8 +875,8 @@ function displayLikes() {
                 <i class="fas fa-heart-broken"></i>
                 <h3>No tienes likes aún</h3>
                 <p>¡Comienza a dar likes para verlos aquí!</p>
-                <button class="btn btn-primary" onclick="showAdoptionSection()">
-                    <i class="fas fa-heart"></i> Buscar Mascotas
+                <button class="btn btn-primary" onclick="showSwipeSection()">
+                    <i class="fas fa-fire"></i> Empezar a Swipear
                 </button>
             </div>
         `;
@@ -965,9 +961,9 @@ function displayMatches() {
             <div class="empty-state">
                 <i class="fas fa-comments"></i>
                 <h3>No tienes matches aún</h3>
-                <p>¡Da "Me gusta" a mascotas en la sección de adopción para encontrar tu match perfecto!</p>
-                <button class="btn btn-primary" onclick="showAdoptionSection()">
-                    <i class="fas fa-heart"></i> Buscar Mascotas
+                <p>¡Sigue swipeando para encontrar tu match perfecto!</p>
+                <button class="btn btn-primary" onclick="showSwipeSection()">
+                    <i class="fas fa-fire"></i> Empezar a Swipear
                 </button>
             </div>
         `;
@@ -1137,6 +1133,24 @@ function getTimeAgo(timestamp) {
     return `${Math.floor(diffInSeconds / 86400)} días`;
 }
 
+function showOutOfProfiles() {
+    const cardStack = document.getElementById('cardStack');
+    cardStack.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-heart-broken"></i>
+            <h3>¡No hay más perfiles!</h3>
+            <p>Has visto todos los perfiles disponibles. ¡Vuelve más tarde para ver nuevos perfiles!</p>
+            <button class="btn btn-primary" onclick="resetProfiles()">
+                <i class="fas fa-refresh"></i> Reiniciar
+            </button>
+        </div>
+    `;
+}
+
+function resetProfiles() {
+    currentCardIndex = 0;
+    createProfileCards();
+}
 
 function showToast(message, type = 'info') {
     // Simple toast notification
@@ -2285,21 +2299,11 @@ window.showLikedPets = showLikedPets;
 window.sponsorIndividualPet = sponsorIndividualPet;
 
 /**
- * Inicia un chat con una mascota (solo si está en likes desde adopción)
+ * Inicia un chat con una mascota
  */
 function startChat(profileId) {
     const profile = profilesData.find(p => p.id === profileId);
-    if (!profile) {
-        showToast('Perfil no encontrado', 'error');
-        return;
-    }
-    
-    // Verificar que el perfil esté en likes (solo desde adopción)
-    const isLiked = likes.find(like => like.id === profileId);
-    if (!isLiked) {
-        showToast('Debes darle "Me gusta" a esta mascota desde la sección de adopción para poder chatear', 'info');
-        return;
-    }
+    if (!profile) return;
     
     console.log('Iniciando chat con:', profile.name, 'ID:', profileId);
     
@@ -2376,8 +2380,8 @@ function loadFavorites() {
                     <i class="fas fa-heart"></i>
                     <h2>No tienes mascotas favoritas aún</h2>
                     <p>¡Explora las mascotas disponibles y dales me gusta!</p>
-                    <button class="btn btn-primary btn-lg" onclick="showAdoptionSection()">
-                        <i class="fas fa-heart"></i> Buscar Mascotas
+                    <button class="btn btn-primary btn-lg" onclick="showSwipeSection()">
+                        <i class="fas fa-fire"></i> Empezar a Swipear
                     </button>
                 </div>
             </div>

@@ -2492,34 +2492,38 @@ async function sendChatIAMessage() {
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error de respuesta:', response.status, errorText); // Debug
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        if (data.success && data.reply) {
-            // Actualizar mensaje del bot con la respuesta real
-            botMsg.innerText = data.reply;
-            
-            // Agregar respuesta al historial
-            chatHistory.push({ role: 'bot', text: data.reply });
-            
-            // Limitar el historial a los últimos 20 mensajes para no exceder límites
-            if (chatHistory.length > 20) {
-                chatHistory = chatHistory.slice(-20);
-            }
+            // Fallback a respuesta local cuando la API devuelva error
+            const fallback = generateAIReply(text);
+            botMsg.innerText = fallback + ' (respuesta local)';
+            chatHistory.push({ role: 'bot', text: fallback });
         } else {
-            throw new Error(data.error || 'No se recibió una respuesta válida');
+            const data = await response.json();
+
+            if (data.success && data.reply) {
+                // Actualizar mensaje del bot con la respuesta real
+                botMsg.innerText = data.reply;
+
+                // Agregar respuesta al historial
+                chatHistory.push({ role: 'bot', text: data.reply });
+
+                // Limitar el historial a los últimos 20 mensajes para no exceder límites
+                if (chatHistory.length > 20) {
+                    chatHistory = chatHistory.slice(-20);
+                }
+            } else {
+                // Si la respuesta JSON no contiene reply, usar fallback local
+                const fallback = generateAIReply(text);
+                botMsg.innerText = fallback + ' (respuesta local)';
+                chatHistory.push({ role: 'bot', text: fallback });
+            }
         }
 
     } catch (error) {
         console.error('Error al comunicarse con el chat:', error);
-        botMsg.innerText = 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.';
-        
-        // Si es un error de conexión, sugerir verificar la configuración
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            botMsg.innerText += ' (Verifica que la API esté configurada correctamente)';
-        }
+        // En caso de error de red, usar respuesta local de respaldo para que el chat siempre responda
+        const fallback = generateAIReply(text);
+        botMsg.innerText = fallback + ' (respuesta local)';
+        chatHistory.push({ role: 'bot', text: fallback });
     } finally {
         // Rehabilitar input y botón
         input.disabled = false;
@@ -2527,6 +2531,17 @@ async function sendChatIAMessage() {
         input.focus();
         messages.scrollTop = messages.scrollHeight;
     }
+}
+
+// Generador simple de respuestas offline (fallback)
+function generateAIReply(userText) {
+    const low = (userText || '').toLowerCase();
+    if (!low) return 'Hola, ¿en qué puedo ayudarte?';
+    if (low.includes('hola') || low.includes('buenas')) return '¡Hola! Puedo ayudarte con información sobre adopciones y cuidados.';
+    if (low.includes('adopt') || low.includes('adop')) return 'Para iniciar una adopción, abre el perfil de la mascota y completa el formulario de adopción. ¿Quieres que te guíe?';
+    if (low.includes('precio') || low.includes('cost')) return 'Los precios y packs varían según el refugio, normalmente el starter pack cuesta alrededor de $50.';
+    if (low.includes('gracias') || low.includes('muchas')) return 'Con gusto — ¡suerte con la adopción!';
+    return 'Lo siento, no entendí completamente. Puedes preguntar sobre adopciones, requisitos o cuidado de mascotas.';
 }
 
 // Permitir enviar mensaje con Enter

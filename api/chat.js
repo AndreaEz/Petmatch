@@ -18,7 +18,17 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { message, conversationHistory = [] } = req.body;
+    // Parsear el body si es necesario
+    let body = req.body;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        return res.status(400).json({ error: 'Body JSON inválido' });
+      }
+    }
+    
+    const { message, conversationHistory = [] } = body || {};
 
     if (!message || !message.trim()) {
       return res.status(400).json({ error: 'El mensaje no puede estar vacío' });

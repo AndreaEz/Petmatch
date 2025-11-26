@@ -38,6 +38,34 @@ let currentChat = null;
 let messages = {};
 
 // ===========================================
+// FUNCIONES DEL BOTÓN IA (Chat IA)
+// ===========================================
+
+/**
+ * Alterna la visibilidad del botón de chat IA
+ */
+function toggleChatIA() {
+    const chatButton = document.getElementById('chatIAButton');
+    if (chatButton) {
+        if (chatButton.style.display === 'none' || chatButton.style.display === '') {
+            chatButton.style.display = 'flex';
+        } else {
+            chatButton.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Oculta el botón de chat IA
+ */
+function hideChatIAButton() {
+    const chatButton = document.getElementById('chatIAButton');
+    if (chatButton) {
+        chatButton.style.display = 'none';
+    }
+}
+
+// ===========================================
 // FUNCIONES DE NAVEGACIÓN (DISPONIBLES INMEDIATAMENTE)
 // ===========================================
 
@@ -329,6 +357,41 @@ function initializeApp() {
                 profilesData.push(pet);
             }
         });
+    }
+
+    // Asegurar que cada like tenga su chat correspondiente
+    syncMatchesWithLikes();
+}
+
+/**
+ * Sincroniza los matches con los likes existentes (usa la vista de adopciones)
+ */
+function syncMatchesWithLikes() {
+    let matchesUpdated = false;
+
+    likes.forEach(like => {
+        const alreadyMatched = matches.some(match => match.id === like.id);
+        if (alreadyMatched) {
+            return;
+        }
+
+        const profile = profilesData.find(p => p.id === like.id);
+        if (!profile) {
+            return;
+        }
+
+        matches.push({
+            id: profile.id,
+            name: profile.name,
+            image: profile.image,
+            matchedAt: like.likedAt || new Date().toISOString()
+        });
+        matchesUpdated = true;
+    });
+
+    if (matchesUpdated) {
+        saveMatches();
+        updateCounters();
     }
 }
 
@@ -776,21 +839,32 @@ function addToLikes(profile, type) {
     }
 }
 
-function checkForMatch(profile) {
-    // Always create a match when liking (as requested)
-        const match = {
-            id: profile.id,
-            name: profile.name,
-            image: profile.image,
-            matchedAt: new Date().toISOString()
-        };
-        
-        matches.push(match);
-        saveMatches();
-        updateCounters();
-        
-        // Show match modal
+function checkForMatch(profile, options = {}) {
+    const { showModal = true } = options;
+    if (!profile) return;
+
+    const existingMatch = matches.find(match => match.id === profile.id);
+    if (existingMatch) {
+        if (showModal) {
+            showMatchModal(profile);
+        }
+        return;
+    }
+
+    const match = {
+        id: profile.id,
+        name: profile.name,
+        image: profile.image,
+        matchedAt: new Date().toISOString()
+    };
+    
+    matches.push(match);
+    saveMatches();
+    updateCounters();
+    
+    if (showModal) {
         showMatchModal(profile);
+    }
 }
 
 
@@ -960,10 +1034,10 @@ function displayMatches() {
         matchesGrid.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-comments"></i>
-                <h3>No tienes matches aún</h3>
-                <p>¡Sigue swipeando para encontrar tu match perfecto!</p>
-                <button class="btn btn-primary" onclick="showSwipeSection()">
-                    <i class="fas fa-fire"></i> Empezar a Swipear
+                <h3>No tienes chats activos</h3>
+                <p>Dale me gusta a una mascota en la sección de adopciones para comenzar a conversar.</p>
+                <button class="btn btn-primary" onclick="showAdoptionSection()">
+                    <i class="fas fa-heart"></i> Ver mascotas para adoptar
                 </button>
             </div>
         `;
@@ -2053,6 +2127,7 @@ function likePet(profileId) {
     if (profile) {
         console.log('Perfil encontrado:', profile.name);
         addToLikes(profile, 'like');
+        checkForMatch(profile, { showModal: false });
         showToast(`¡Te gusta ${profile.name}!`, 'success');
     } else {
         console.error('No se encontró el perfil con ID:', profileId);

@@ -36,6 +36,7 @@ module.exports = async (req, res) => {
 
     // Obtener la API key de Gemini desde las variables de entorno
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 
     if (!GEMINI_API_KEY) {
       console.error('GEMINI_API_KEY no está configurada');
@@ -74,7 +75,7 @@ Sé amigable, empático y profesional. Responde en español. Si no sabes algo, a
     ];
 
     // Llamar a la API de Gemini
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
     
     const response = await fetch(geminiUrl, {
       method: 'POST',

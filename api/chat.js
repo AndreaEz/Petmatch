@@ -2,6 +2,16 @@
 // Esta función se ejecuta como serverless function en Vercel
 
 module.exports = async (req, res) => {
+  // Configurar headers CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Manejar preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   // Solo permitir métodos POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });

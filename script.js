@@ -2487,17 +2487,23 @@ function submitAdoptionFormDynamic(profileId) {
     const profile = profilesData.find(p => p.id === profileId);
     if (!profile) return;
 
-    // Recopilar datos del formulario
+    // Recopilar datos del formulario DENTRO del modal dinámico para evitar conflictos por IDs duplicados
+    const modalEl = document.getElementById('adoptionFormModal');
+    const get = (sel) => {
+        if (!modalEl) return null;
+        return modalEl.querySelector(sel);
+    };
+
     const formData = {
         petId: profileId,
         petName: profile.name,
-        adopterName: document.getElementById('adopterName') ? document.getElementById('adopterName').value : '',
-        adopterEmail: document.getElementById('adopterEmail') ? document.getElementById('adopterEmail').value : '',
-        adopterPhone: document.getElementById('adopterPhone') ? document.getElementById('adopterPhone').value : '',
-        adopterAddress: document.getElementById('adopterAddress') ? document.getElementById('adopterAddress').value : '',
-        adoptionReason: document.getElementById('adoptionReason') ? document.getElementById('adoptionReason').value : '',
-        petExperience: document.getElementById('petExperience') ? document.getElementById('petExperience').value : '',
-        starterPack: (document.querySelector('input[name="starterPack"]:checked') || {}).value || ''
+        adopterName: get('#adopterName') ? get('#adopterName').value.trim() : '',
+        adopterEmail: get('#adopterEmail') ? get('#adopterEmail').value.trim() : '',
+        adopterPhone: get('#adopterPhone') ? get('#adopterPhone').value.trim() : '',
+        adopterAddress: get('#adopterAddress') ? get('#adopterAddress').value.trim() : '',
+        adoptionReason: get('#adoptionReason') ? get('#adoptionReason').value.trim() : '',
+        petExperience: get('#petExperience') ? get('#petExperience').value.trim() : '',
+        starterPack: (get('input[name="starterPack"]:checked') || {}).value || ''
     };
 
     // Validar campos requeridos

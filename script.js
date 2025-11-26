@@ -37,6 +37,9 @@ let currentChat = null;
 // Objeto que almacena todos los mensajes por perfil
 let messages = {};
 
+// Historial de conversación del chat IA para mantener contexto
+let chatHistory = [];
+
 // ===========================================
 // FUNCIONES DEL BOTÓN IA (Chat IA)
 // ===========================================

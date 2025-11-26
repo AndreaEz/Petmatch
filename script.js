@@ -2465,9 +2465,15 @@ async function sendChatIAMessage() {
 
     try {
         // Determinar la URL de la API (funciona tanto en desarrollo como en producción)
-        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:3000/api/chat'  // Desarrollo local
-            : '/api/chat';  // Producción en Vercel
+        let apiUrl;
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            apiUrl = 'http://localhost:3000/api/chat';  // Desarrollo local
+        } else {
+            // Producción en Vercel - usar URL relativa
+            apiUrl = '/api/chat';
+        }
+
+        console.log('Llamando a API:', apiUrl); // Debug
 
         // Llamar a la API
         const response = await fetch(apiUrl, {
@@ -2481,7 +2487,11 @@ async function sendChatIAMessage() {
             })
         });
 
+        console.log('Respuesta recibida:', response.status, response.statusText); // Debug
+
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error de respuesta:', response.status, errorText); // Debug
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 

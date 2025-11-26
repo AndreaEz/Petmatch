@@ -40,30 +40,7 @@ let messages = {};
 // ===========================================
 // FUNCIONES DEL BOTÓN IA (Chat IA)
 // ===========================================
-
-/**
- * Alterna la visibilidad del botón de chat IA
- */
-function toggleChatIA() {
-    const chatButton = document.getElementById('chatIAButton');
-    if (chatButton) {
-        if (chatButton.style.display === 'none' || chatButton.style.display === '') {
-            chatButton.style.display = 'flex';
-        } else {
-            chatButton.style.display = 'none';
-        }
-    }
-}
-
-/**
- * Oculta el botón de chat IA
- */
-function hideChatIAButton() {
-    const chatButton = document.getElementById('chatIAButton');
-    if (chatButton) {
-        chatButton.style.display = 'none';
-    }
-}
+// Nota: Las funciones del chat IA están definidas más abajo en el archivo
 
 // ===========================================
 // FUNCIONES DE NAVEGACIÓN (DISPONIBLES INMEDIATAMENTE)
@@ -2420,8 +2397,6 @@ function startChat(profileId) {
 }
 
 // === Chat IA (conectado a Gemini API) ===
-// Historial de conversación para mantener contexto
-let chatHistory = [];
 
 function toggleChatIA() {
     const win = document.getElementById('chatIAWindow');

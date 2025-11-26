@@ -1,7 +1,7 @@
 // API endpoint para el chat con Gemini
 // Esta función se ejecuta como serverless function en Vercel
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Solo permitir métodos POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -97,5 +97,5 @@ Sé amigable, empático y profesional. Responde en español. Si no sabes algo, a
       error: 'Error interno del servidor. Por favor, intenta de nuevo más tarde.' 
     });
   }
-};
+}
 

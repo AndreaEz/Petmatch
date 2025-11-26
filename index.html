@@ -31,12 +31,71 @@
         .chat-ia-button:hover {
             transform: scale(1.1);
         }
+        .chat-ia-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 340px;
+            height: 420px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 2000;
+        }
+        .chat-ia-header {
+            padding: 10px 12px;
+            background: linear-gradient(90deg,#667eea,#764ba2);
+            color: #fff;
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-ia-messages {
+            padding: 12px;
+            flex: 1 1 auto;
+            overflow-y: auto;
+            background: #f7f9fc;
+        }
+        .chat-ia-input {
+            display:flex;
+            gap:8px;
+            padding:10px;
+            border-top:1px solid #eee;
+        }
+        .chat-msg {
+            margin-bottom:8px;
+            max-width:80%;
+            padding:8px 10px;
+            border-radius:12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .chat-msg.user { background:#e6f4ff; margin-left:auto; }
+        .chat-msg.bot { background:#fff; margin-right:auto; }
     </style>
 </head>
 <body>
     <!-- Floating Chat IA Button -->
-    <div class="chat-ia-button" id="chatIAButton" style="display: none;" onclick="toggleChatIA()">
+    <div class="chat-ia-button" id="chatIAButton" style="display: flex;" onclick="toggleChatIA()" title="Chat IA">
         <i class="fas fa-robot"></i>
+    </div>
+
+    <!-- Chat IA Window -->
+    <div class="chat-ia-window" id="chatIAWindow" style="display: none;">
+        <div class="chat-ia-header">
+            <strong>Asistente IA</strong>
+            <div class="chat-ia-controls">
+                <button class="btn btn-sm btn-light" id="minimizeChatBtn" onclick="toggleChatIA()">_</button>
+                <button class="btn btn-sm btn-light" id="closeChatBtn" onclick="closeChatIA()">×</button>
+            </div>
+        </div>
+        <div class="chat-ia-messages" id="chatIAMessages" aria-live="polite"></div>
+        <div class="chat-ia-input">
+            <input type="text" id="chatAIInput" class="form-control" placeholder="Escribe tu mensaje..." />
+            <button class="btn btn-primary" id="sendChatAIBtn" onclick="sendChatIAMessage()">Enviar</button>
+        </div>
     </div>
 
     <!-- Header -->

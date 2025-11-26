@@ -1492,7 +1492,7 @@ function showAdoptionForm(profileId) {
             
             <div class="adoption-form-actions">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" onclick="submitAdoptionForm(${profile.id})">
+                <button type="button" class="btn btn-success" onclick="submitAdoptionFormDynamic(${profile.id})">
                     <i class="fas fa-heart"></i> Enviar Solicitud de Adopción
                 </button>
             </div>
@@ -1513,10 +1513,10 @@ function submitAdoptionForm() {
         form.reportValidity();
         return;
     }
-    
+
     const formData = {
-        petId: currentAdoptionPet.id,
-        petName: currentAdoptionPet.name,
+        petId: currentAdoptionPet ? currentAdoptionPet.id : null,
+        petName: currentAdoptionPet ? currentAdoptionPet.name : null,
         adopterName: document.getElementById('adopterName').value,
         adopterEmail: document.getElementById('adopterEmail').value,
         adopterPhone: document.getElementById('adopterPhone').value,
@@ -1527,16 +1527,34 @@ function submitAdoptionForm() {
         includeStarterPack: document.getElementById('includeStarterPack').checked,
         starterPackPrice: document.getElementById('includeStarterPack').checked ? 50 : 0
     };
-    
+
     // Simulate form submission
-    showToast('¡Solicitud de adopción enviada exitosamente! Te contactaremos pronto.', 'success');
-    
-    // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('adoptionModal'));
-    modal.hide();
-    
-    // In a real app, this would send the data to a server
     console.log('Adoption form submitted:', formData);
+
+    // Show a small green confirmation box so the user sees success clearly
+    const successBox = document.createElement('div');
+    successBox.id = 'adoptionSuccessBox';
+    successBox.className = 'alert alert-success';
+    successBox.style.position = 'fixed';
+    successBox.style.bottom = '20px';
+    successBox.style.right = '20px';
+    successBox.style.zIndex = 2000;
+    successBox.style.boxShadow = '0 6px 20px rgba(0,0,0,0.12)';
+    successBox.innerText = `¡Solicitud enviada con éxito para ${formData.petName || 'la mascota'}! Te contactaremos pronto.`;
+    document.body.appendChild(successBox);
+
+    setTimeout(() => {
+        if (successBox) successBox.remove();
+    }, 3500);
+
+    // Close modal if open
+    const modalEl = document.getElementById('adoptionModal');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+    }
+
+    // In a real app, this would send the data to a server
     
     // Reset form
     form.reset();
@@ -2372,6 +2390,9 @@ window.startChat = startChat;
 window.submitAdoptionForm = submitAdoptionForm;
 window.showLikedPets = showLikedPets;
 window.sponsorIndividualPet = sponsorIndividualPet;
+window.toggleChatIA = toggleChatIA;
+window.sendChatIAMessage = sendChatIAMessage;
+window.closeChatIA = closeChatIA;
 
 /**
  * Inicia un chat con una mascota
@@ -2398,40 +2419,119 @@ function startChat(profileId) {
     showToast(`Iniciando chat con ${profile.name}`, 'success');
 }
 
+// === Chat IA (simulado) ===
+function toggleChatIA() {
+    const win = document.getElementById('chatIAWindow');
+    const btn = document.getElementById('chatIAButton');
+    if (!win) return;
+    if (win.style.display === 'none' || win.style.display === '') {
+        win.style.display = 'flex';
+        if (btn) btn.classList.add('active');
+        const input = document.getElementById('chatAIInput');
+        if (input) input.focus();
+    } else {
+        win.style.display = 'none';
+        if (btn) btn.classList.remove('active');
+    }
+}
+
+function closeChatIA() {
+    const win = document.getElementById('chatIAWindow');
+    const btn = document.getElementById('chatIAButton');
+    if (win) win.style.display = 'none';
+    if (btn) btn.classList.remove('active');
+}
+
+function sendChatIAMessage() {
+    const input = document.getElementById('chatAIInput');
+    const messages = document.getElementById('chatIAMessages');
+    if (!input || !messages) return;
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Append user message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'chat-msg user';
+    userMsg.innerText = text;
+    messages.appendChild(userMsg);
+    messages.scrollTop = messages.scrollHeight;
+    input.value = '';
+
+    // Simulate IA typing and response
+    const botMsg = document.createElement('div');
+    botMsg.className = 'chat-msg bot';
+    botMsg.innerText = 'Escribiendo...';
+    messages.appendChild(botMsg);
+    messages.scrollTop = messages.scrollHeight;
+
+    setTimeout(() => {
+        // Simple simulated response - can be enhanced
+        botMsg.innerText = generateAIReply(text);
+        messages.scrollTop = messages.scrollHeight;
+    }, 900 + Math.random() * 900);
+}
+
+function generateAIReply(userText) {
+    // Very simple canned AI replies for offline demo
+    const low = userText.toLowerCase();
+    if (low.includes('hola') || low.includes('buenas')) return '¡Hola! ¿En qué puedo ayudarte con la adopción?';
+    if (low.includes('adopt') || low.includes('adop')) return 'Para adoptar, completa el formulario de adopción con tus datos. ¿Quieres que te guíe?';
+    if (low.includes('gracias')) return 'Con gusto. Si necesitas algo más, aquí estaré.';
+    return 'Gracias por tu mensaje. Puedo ayudarte con la adopción, soporte y preguntas sobre mascotas.';
+}
+
 /**
  * Envía el formulario de adopción
  */
-function submitAdoptionForm(profileId) {
+function submitAdoptionFormDynamic(profileId) {
     const profile = profilesData.find(p => p.id === profileId);
     if (!profile) return;
-    
+
     // Recopilar datos del formulario
     const formData = {
         petId: profileId,
         petName: profile.name,
-        adopterName: document.getElementById('adopterName').value,
-        adopterEmail: document.getElementById('adopterEmail').value,
-        adopterPhone: document.getElementById('adopterPhone').value,
-        adopterAddress: document.getElementById('adopterAddress').value,
-        adoptionReason: document.getElementById('adoptionReason').value,
-        petExperience: document.getElementById('petExperience').value,
-        starterPack: document.querySelector('input[name="starterPack"]:checked').value
+        adopterName: document.getElementById('adopterName') ? document.getElementById('adopterName').value : '',
+        adopterEmail: document.getElementById('adopterEmail') ? document.getElementById('adopterEmail').value : '',
+        adopterPhone: document.getElementById('adopterPhone') ? document.getElementById('adopterPhone').value : '',
+        adopterAddress: document.getElementById('adopterAddress') ? document.getElementById('adopterAddress').value : '',
+        adoptionReason: document.getElementById('adoptionReason') ? document.getElementById('adoptionReason').value : '',
+        petExperience: document.getElementById('petExperience') ? document.getElementById('petExperience').value : '',
+        starterPack: (document.querySelector('input[name="starterPack"]:checked') || {}).value || ''
     };
-    
+
     // Validar campos requeridos
     if (!formData.adopterName || !formData.adopterEmail || !formData.adopterPhone || !formData.adopterAddress || !formData.adoptionReason) {
-        showToast('Por favor completa todos los campos requeridos', 'error');
+        // Mostrar un mensaje claro en rojo
+        const errBox = document.createElement('div');
+        errBox.className = 'alert alert-danger';
+        errBox.style.position = 'fixed';
+        errBox.style.bottom = '20px';
+        errBox.style.right = '20px';
+        errBox.style.zIndex = 2000;
+        errBox.innerText = 'Por favor completa todos los campos requeridos para enviar la solicitud.';
+        document.body.appendChild(errBox);
+        setTimeout(() => { if (errBox) errBox.remove(); }, 3500);
         return;
     }
-    
+
     // Simular envío del formulario
-    console.log('Formulario de adopción enviado:', formData);
-    
+    console.log('Formulario de adopción enviado (dinámico):', formData);
+
     // Cerrar modal
     const modal = bootstrap.Modal.getInstance(document.getElementById('adoptionFormModal'));
     if (modal) modal.hide();
-    
-    showToast(`¡Solicitud de adopción enviada para ${profile.name}! Te contactaremos pronto.`, 'success');
+
+    // Mostrar éxito
+    const successBox = document.createElement('div');
+    successBox.className = 'alert alert-success';
+    successBox.style.position = 'fixed';
+    successBox.style.bottom = '20px';
+    successBox.style.right = '20px';
+    successBox.style.zIndex = 2000;
+    successBox.innerText = `¡Solicitud de adopción enviada para ${profile.name}! Te contactaremos pronto.`;
+    document.body.appendChild(successBox);
+    setTimeout(() => { if (successBox) successBox.remove(); }, 3500);
 }
 
 /**

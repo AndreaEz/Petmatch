@@ -2419,7 +2419,10 @@ function startChat(profileId) {
     showToast(`Iniciando chat con ${profile.name}`, 'success');
 }
 
-// === Chat IA (simulado) ===
+// === Chat IA (conectado a Gemini API) ===
+// Historial de conversación para mantener contexto
+let chatHistory = [];
+
 function toggleChatIA() {
     const win = document.getElementById('chatIAWindow');
     const btn = document.getElementById('chatIAButton');
@@ -2429,6 +2432,15 @@ function toggleChatIA() {
         if (btn) btn.classList.add('active');
         const input = document.getElementById('chatAIInput');
         if (input) input.focus();
+        
+        // Mostrar mensaje de bienvenida si es la primera vez
+        const messages = document.getElementById('chatIAMessages');
+        if (messages && messages.children.length === 0) {
+            const welcomeMsg = document.createElement('div');
+            welcomeMsg.className = 'chat-msg bot';
+            welcomeMsg.innerText = '¡Hola! Soy tu asistente virtual de PetMatch. ¿En qué puedo ayudarte hoy?';
+            messages.appendChild(welcomeMsg);
+        }
     } else {
         win.style.display = 'none';
         if (btn) btn.classList.remove('active');
@@ -2442,14 +2454,20 @@ function closeChatIA() {
     if (btn) btn.classList.remove('active');
 }
 
-function sendChatIAMessage() {
+async function sendChatIAMessage() {
     const input = document.getElementById('chatAIInput');
     const messages = document.getElementById('chatIAMessages');
+    const sendBtn = document.getElementById('sendChatAIBtn');
+    
     if (!input || !messages) return;
     const text = input.value.trim();
     if (!text) return;
 
-    // Append user message
+    // Deshabilitar input y botón mientras se procesa
+    input.disabled = true;
+    if (sendBtn) sendBtn.disabled = true;
+
+    // Agregar mensaje del usuario
     const userMsg = document.createElement('div');
     userMsg.className = 'chat-msg user';
     userMsg.innerText = text;
@@ -2457,28 +2475,84 @@ function sendChatIAMessage() {
     messages.scrollTop = messages.scrollHeight;
     input.value = '';
 
-    // Simulate IA typing and response
+    // Agregar mensaje al historial
+    chatHistory.push({ role: 'user', text: text });
+
+    // Mostrar indicador de escritura
     const botMsg = document.createElement('div');
     botMsg.className = 'chat-msg bot';
     botMsg.innerText = 'Escribiendo...';
     messages.appendChild(botMsg);
     messages.scrollTop = messages.scrollHeight;
 
-    setTimeout(() => {
-        // Simple simulated response - can be enhanced
-        botMsg.innerText = generateAIReply(text);
+    try {
+        // Determinar la URL de la API (funciona tanto en desarrollo como en producción)
+        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000/api/chat'  // Desarrollo local
+            : '/api/chat';  // Producción en Vercel
+
+        // Llamar a la API
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: text,
+                conversationHistory: chatHistory
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.reply) {
+            // Actualizar mensaje del bot con la respuesta real
+            botMsg.innerText = data.reply;
+            
+            // Agregar respuesta al historial
+            chatHistory.push({ role: 'bot', text: data.reply });
+            
+            // Limitar el historial a los últimos 20 mensajes para no exceder límites
+            if (chatHistory.length > 20) {
+                chatHistory = chatHistory.slice(-20);
+            }
+        } else {
+            throw new Error(data.error || 'No se recibió una respuesta válida');
+        }
+
+    } catch (error) {
+        console.error('Error al comunicarse con el chat:', error);
+        botMsg.innerText = 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.';
+        
+        // Si es un error de conexión, sugerir verificar la configuración
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            botMsg.innerText += ' (Verifica que la API esté configurada correctamente)';
+        }
+    } finally {
+        // Rehabilitar input y botón
+        input.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+        input.focus();
         messages.scrollTop = messages.scrollHeight;
-    }, 900 + Math.random() * 900);
+    }
 }
 
-function generateAIReply(userText) {
-    // Very simple canned AI replies for offline demo
-    const low = userText.toLowerCase();
-    if (low.includes('hola') || low.includes('buenas')) return '¡Hola! ¿En qué puedo ayudarte con la adopción?';
-    if (low.includes('adopt') || low.includes('adop')) return 'Para adoptar, completa el formulario de adopción con tus datos. ¿Quieres que te guíe?';
-    if (low.includes('gracias')) return 'Con gusto. Si necesitas algo más, aquí estaré.';
-    return 'Gracias por tu mensaje. Puedo ayudarte con la adopción, soporte y preguntas sobre mascotas.';
-}
+// Permitir enviar mensaje con Enter
+document.addEventListener('DOMContentLoaded', function() {
+    const chatInput = document.getElementById('chatAIInput');
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatIAMessage();
+            }
+        });
+    }
+});
 
 /**
  * Envía el formulario de adopción
